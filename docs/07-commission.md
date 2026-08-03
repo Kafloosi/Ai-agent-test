@@ -461,6 +461,22 @@ The rule the user specified is preserved exactly in both configurations: **one d
 any seated commissioner voids everything.** The knob governs which seats are seated for a
 given risk class, never whether a seated seat's dissent is binding.
 
+## 7.12a Second function — amendments
+
+Beyond adjudicating work, the Commission is the fleet's amendment body. Any agent may propose
+an optimization; the Commission approves it at **80% of non-abstaining votes, with an
+absolute floor of 6 approvals**, and C6 and C10 hold jurisdictional vetoes. Full process in
+[`11-capability-genesis-and-amendments.md`](11-capability-genesis-and-amendments.md) §11.7–11.9.
+
+The two thresholds are deliberately different and not in conflict: **unanimity governs
+accepting work** — one seat spotting a real defect must be able to stop it shipping, because
+users bear the cost of a shipped defect. **Supermajority governs changing the system** —
+unanimity there would let one seat freeze the fleet permanently, and a simple majority would
+let it churn.
+
+Amendment votes are batched into a weekly docket, never run in the hot path, and approvals
+carry no rationale (§10.2).
+
 ## 7.13 Failure modes of the Commission itself
 
 The Commission is a subsystem and can fail like any other. Each of these is watched by the

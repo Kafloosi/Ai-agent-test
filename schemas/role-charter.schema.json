@@ -1,0 +1,85 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/role-charter.schema.json",
+  "title": "RoleCharter",
+  "description": "Definition of a role that does not exist yet, written before any candidate runs. Candidates cannot be compared fairly without a definition of the job, and the evaluation set must be sealed before the candidates exist so it cannot be written to favour one of them.",
+  "type": "object",
+  "required": ["id", "role", "inputs", "outputs", "exit_criteria", "evaluation_set", "recurrence_projection"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "role": { "type": "string", "maxLength": 200, "description": "Single responsibility. If it needs two sentences, it is two roles." },
+    "gap_trigger": {
+      "enum": ["hard_gap", "soft_gap", "chronic_escalation"],
+      "description": "hard_gap: no capability match. soft_gap: nominal match, first-pass yield <40% over >=8 runs. chronic_escalation: >=3 human escalations with no code defect found."
+    },
+    "inputs": { "type": "array", "items": { "type": "string" } },
+    "outputs": { "type": "array", "items": { "type": "string" } },
+    "design_logic": { "type": "string", "maxLength": 1500 },
+    "model_tier": { "enum": ["T1", "T2", "T3"] },
+    "tools": { "type": "array", "items": { "type": "string" } },
+    "guardrails": { "type": "array", "items": { "type": "string" } },
+    "exit_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Also the probation bar: the provisional winner must sustain these across 5 work orders before promotion to permanent."
+    },
+    "evaluation_set": {
+      "type": "object",
+      "required": ["trial_work_order", "sealed_cases"],
+      "properties": {
+        "trial_work_order": { "type": "string" },
+        "sealed_cases": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 4,
+          "items": { "type": "string" },
+          "description": "Historical or synthetic tasks of the same class with known-good outcomes. Sealed before candidates exist."
+        },
+        "sealed_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "recurrence_projection": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Projected work orders of this class. Genesis costs 3x one work order and runs only at >=5; below that, route to a generalist with a human checkpoint."
+    },
+    "candidates": {
+      "type": "array",
+      "maxItems": 3,
+      "description": "Exactly one dimension varies between candidates: how procedural knowledge is composed. Charter, context pack, tools, budget, model tier and sealed task are identical.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "label": { "enum": ["A_composed", "B_first_principles", "C_exemplar_derived"] },
+          "instance_id": { "type": "string" },
+          "skill_composition": { "type": "array", "items": { "type": "string" } },
+          "gate0_passed": { "type": "boolean", "description": "A candidate failing Gate 0 is disqualified outright — correctness is a qualifier, not a weighted term." },
+          "admissible_dissents": { "type": "integer" },
+          "tokens_spent": { "type": "integer" },
+          "attempts": { "type": "integer" },
+          "diff_lines": { "type": "integer" },
+          "outcome": { "enum": ["winner", "eliminated", "disqualified"] }
+        }
+      }
+    },
+    "status": {
+      "enum": ["drafted", "running", "provisional", "permanent", "abandoned"],
+      "description": "provisional -> permanent requires 5 work orders sustaining exit_criteria. Probation failure re-opens genesis with a revised charter; the runner-up is never promoted, having already lost on the same evidence."
+    },
+    "probation": {
+      "type": "object",
+      "properties": {
+        "work_orders_required": { "type": "integer", "default": 5 },
+        "work_orders_completed": { "type": "integer" },
+        "sustaining": { "type": "boolean" }
+      }
+    },
+    "harvested_patterns": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Patterns the Commission marked approved in an eliminated candidate's dossier, folded into the winner's skill pack before termination. Without this, two thirds of the genesis cost buys nothing."
+    }
+  }
+}

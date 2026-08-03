@@ -15,7 +15,7 @@ flowchart TB
     READY -- yes --> PRIO["Priority score =<br/>critical-path length × risk × age"]
     PRIO --> CAP{"Capability match<br/>in routing table"}
     CAP -- "exactly one pool" --> LEASE
-    CAP -- "no match" --> ESC["Escalate:<br/>missing capability"]
+    CAP -- "no match" --> ESC["Capability gap →<br/>genesis tournament (§11)<br/>or generalist + human"]
     CAP -- "ambiguous / multi-pool" --> LLMR["LLM router (T1)<br/>classify + justify"]
     LLMR --> LEASE["Lease worker<br/>timeout = budget.wall_clock_s"]
     LEASE --> AFF{"File-scope affinity:<br/>module lease free?"}

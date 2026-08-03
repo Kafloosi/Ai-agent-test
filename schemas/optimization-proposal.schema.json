@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/optimization-proposal.schema.json",
+  "title": "OptimizationProposal",
+  "description": "Any agent's proposal to change the system. Deliberately narrow so it does not become narration by another name: all four evidence fields are required, the whole thing is capped at 300 tokens, and one proposal per agent per work order. A proposal without run evidence is discarded at intake without reaching the Commission.",
+  "type": "object",
+  "required": ["id", "proposed_by", "observation", "change", "expected_effect", "risk", "amendment_class"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "proposed_by": { "type": "string", "description": "Agent role. Tracked for proposal precision: approved-and-held / submitted." },
+    "work_order_id": { "type": "string" },
+    "observation": {
+      "type": "string",
+      "maxLength": 400,
+      "description": "The inefficiency, with evidence from an actual run — a work-order id, a metric, a verdict field. Not a hypothetical."
+    },
+    "evidence_refs": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Required. Intake discards proposals with none."
+    },
+    "change": {
+      "type": "string",
+      "maxLength": 400,
+      "description": "The concrete change. Not 'improve retrieval' — the specific rule, value, prompt edit, or gate check."
+    },
+    "expected_effect": {
+      "type": "object",
+      "required": ["metric", "direction"],
+      "description": "A falsifiable prediction. If the metric does not move after release, the amendment is auto-reverted and recorded against the proposer.",
+      "properties": {
+        "metric": { "type": "string" },
+        "direction": { "enum": ["increase", "decrease"] },
+        "magnitude": { "type": "string", "maxLength": 100 }
+      }
+    },
+    "risk": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "What this could break, and which guardrail it touches."
+    },
+    "amendment_class": {
+      "enum": ["ordinary", "constitutional"],
+      "description": "Ordinary: 80% Commission vote. Constitutional: human ratification, Commission vote advisory only. Anything touching separation of duties, Gate 0's authority, the unanimity rule, human checkpoints, security/evidence requirements, the amendment process itself — or the proposer's own budget, tier, or evaluation — is constitutional automatically."
+    },
+    "triage": {
+      "type": "object",
+      "properties": {
+        "outcome": { "enum": ["discarded_no_evidence", "merged_duplicate", "discarded_previously_rejected", "eval_failed", "docketed"] },
+        "merged_into": { "type": "string" },
+        "support_count": { "type": "integer", "description": "How many agents independently proposed this. Raised support is evidence of a real pattern." },
+        "golden_set_delta": { "type": "number", "description": "Mechanically testable proposals are evaluated BEFORE the vote — an eval is far cheaper than ten seats." }
+      }
+    },
+    "vote": {
+      "type": "object",
+      "properties": {
+        "approve": { "type": "integer" },
+        "reject": { "type": "integer" },
+        "abstain": { "type": "integer", "description": "Permitted only outside the seat's jurisdiction." },
+        "threshold_met": { "type": "boolean", "description": "approve >= 80% of non-abstaining votes AND approve >= 6 absolute." },
+        "jurisdictional_veto": {
+          "type": ["string", "null"],
+          "description": "C6 (Security) and C10 (Evidence & Process) hold an absolute veto over proposals touching their jurisdiction. A security-weakening optimization does not pass 8-2."
+        },
+        "reject_rationales": { "type": "array", "items": { "type": "string", "maxLength": 300 }, "description": "Required on REJECT only; approvals carry no prose." }
+      }
+    },
+    "release": {
+      "type": "object",
+      "description": "Approval is not deployment. The Commission approves the change; the eval proves it works and the monitor can roll it back.",
+      "properties": {
+        "version": { "type": "string" },
+        "released_at": { "type": "string", "format": "date-time" },
+        "monitored_metric_moved": { "type": "boolean" },
+        "status": { "enum": ["released", "monitoring", "permanent", "auto_reverted"] }
+      }
+    }
+  }
+}
