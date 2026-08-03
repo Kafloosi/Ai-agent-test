@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/finding.schema.json",
+  "title": "Finding",
+  "description": "A single reviewer, security, or performance observation. The failure_scenario requirement is deliberate: a blocking finding that cannot name concrete inputs producing wrong behaviour is unfalsifiable, and unfalsifiable objections are the main cause of non-converging review loops.",
+  "type": "object",
+  "required": ["severity", "category", "file", "line", "summary"],
+  "additionalProperties": false,
+  "properties": {
+    "severity": {
+      "enum": ["blocker", "major", "minor", "nit"],
+      "description": "blocker and major block the gate; minor and nit never do."
+    },
+    "category": {
+      "enum": ["correctness", "contract-violation", "security", "performance", "concurrency", "error-handling", "maintainability", "test-coverage", "style"]
+    },
+    "file": { "type": "string" },
+    "line": { "type": "integer", "minimum": 1 },
+    "summary": { "type": "string", "maxLength": 200, "description": "One sentence stating the defect." },
+    "failure_scenario": {
+      "type": "string",
+      "description": "REQUIRED for blocker and major: concrete inputs or state, and the resulting wrong output or crash."
+    },
+    "suggested_fix": { "type": "string" },
+    "cwe": { "type": "string", "description": "Security findings only." },
+    "exploit_path": {
+      "type": "object",
+      "description": "Security findings only.",
+      "properties": {
+        "attacker": { "type": "string" },
+        "precondition": { "type": "string" },
+        "impact": { "type": "string" }
+      }
+    },
+    "measurement": {
+      "type": "object",
+      "description": "Performance findings only. Advisory unless a budget is actually breached.",
+      "properties": {
+        "metric": { "type": "string" },
+        "baseline": { "type": "number" },
+        "observed": { "type": "number" },
+        "budget": { "type": "number" },
+        "breached": { "type": "boolean" }
+      }
+    },
+    "author_role": { "type": "string" },
+    "outcome": {
+      "enum": ["fixed", "accepted_risk", "disputed", "open"],
+      "description": "Set during refinement. accepted_risk on a blocker requires human sign-off."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "severity": { "enum": ["blocker", "major"] } } },
+      "then": { "required": ["failure_scenario"] }
+    }
+  ]
+}

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/verdict.schema.json",
+  "title": "Verdict",
+  "description": "Signed, immutable output of a validation gate. Bound to a specific base commit and patch hash: a verdict is invalid once either changes, which is what forces re-verification after rebase.",
+  "type": "object",
+  "required": ["gate", "work_order_id", "base_commit", "patch_hash", "result", "issued_at"],
+  "additionalProperties": false,
+  "properties": {
+    "gate": { "enum": ["gate0", "gate1", "gate2"] },
+    "work_order_id": { "type": "string" },
+    "attempt": { "type": "integer", "minimum": 1 },
+    "base_commit": { "type": "string" },
+    "patch_hash": { "type": "string" },
+    "result": { "enum": ["pass", "fail", "blocked_pending_human"] },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "signature": { "type": "string", "description": "Prevents a verdict being forged or edited by an agent." },
+    "checks": {
+      "type": "array",
+      "description": "Gate 0 detail. Ordered cheapest-first; execution stops at the first hard failure.",
+      "items": {
+        "type": "object",
+        "required": ["name", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {
+            "enum": ["format", "lint", "typecheck", "build", "unit_affected", "unit_full", "integration", "coverage_delta", "sast", "sca", "secrets", "licence", "protected_paths", "contract_conformance"]
+          },
+          "status": { "enum": ["pass", "fail", "skipped", "flaky"] },
+          "duration_ms": { "type": "integer" },
+          "evidence": { "type": "string", "description": "Trimmed log excerpt — bounded, never the full log." },
+          "failing_tests": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string" },
+                "assertion": { "type": "string" },
+                "signature": { "type": "string", "description": "Stable hash of test id + assertion. Identical signatures across attempts trip the no-progress detector." }
+              }
+            }
+          }
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "description": "Gate 1 detail. A blocking finding without a reproducible failure_scenario is invalid and must be downgraded.",
+      "items": { "$ref": "https://example.com/schemas/finding.schema.json" }
+    },
+    "coverage_delta": { "type": "number" },
+    "metrics": {
+      "type": "object",
+      "description": "Gate 2 / performance detail, compared against Architect-set NFR budgets.",
+      "additionalProperties": { "type": "number" }
+    },
+    "human_approval": {
+      "type": "object",
+      "properties": {
+        "required": { "type": "boolean" },
+        "approver": { "type": "string" },
+        "decision": { "enum": ["approved", "rejected", "pending"] },
+        "rationale": { "type": "string" }
+      }
+    }
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/patch.schema.json",
+  "title": "Patch",
+  "description": "Output of an Implementer or Refiner. Schema-validated at the boundary before it may enter the task store — an unvalidated artifact corrupts every downstream decision and surfaces far from its cause.",
+  "type": "object",
+  "required": ["work_order_id", "base_commit", "diff", "confidence"],
+  "additionalProperties": false,
+  "properties": {
+    "work_order_id": { "type": "string" },
+    "attempt": { "type": "integer", "minimum": 1 },
+    "author_role": { "type": "string" },
+    "model_tier": { "enum": ["T1", "T2", "T3"] },
+    "base_commit": { "type": "string", "description": "Pinned base. A verdict issued against a different base is invalid." },
+    "diff": { "type": "string", "description": "Unified diff." },
+    "files_touched": { "type": "array", "items": { "type": "string" } },
+    "self_tests_added": { "type": "array", "items": { "type": "string" } },
+    "root_cause": { "type": "string", "description": "Refiner only: the hypothesis this patch tests. Required before any corrective edit." },
+    "notes": { "type": "string", "description": "Free text. No other agent may parse this field." },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Below threshold routes to a stronger tier or attaches a targeted question rather than guessing."
+    },
+    "assumptions": { "type": "array", "items": { "type": "string" } },
+    "contract_deviations": {
+      "type": "array",
+      "description": "Reported, never taken unilaterally. Routes to the Architect if the contract is genuinely wrong.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "contract": { "type": "string" },
+          "deviation": { "type": "string" },
+          "reason": { "type": "string" }
+        }
+      }
+    },
+    "scope_expansion_request": {
+      "type": "object",
+      "description": "Raised when the work requires touching files outside files_hint. Requires Orchestrator approval; unapproved out-of-scope edits fail Gate 0.",
+      "properties": {
+        "files": { "type": "array", "items": { "type": "string" } },
+        "justification": { "type": "string" }
+      }
+    }
+  }
+}

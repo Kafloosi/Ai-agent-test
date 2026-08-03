@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/failure-bundle.schema.json",
+  "title": "FailureBundle",
+  "description": "Everything an agent (or a human) needs to fix a failure without repeating work already done. The attempt history is the load-bearing part: it is what stops a Refiner re-testing a hypothesis that has already been falsified.",
+  "type": "object",
+  "required": ["work_order_id", "attempt", "verdict", "root_cause_class"],
+  "additionalProperties": false,
+  "properties": {
+    "work_order_id": { "type": "string" },
+    "attempt": { "type": "integer", "minimum": 1 },
+    "verdict": { "$ref": "https://example.com/schemas/verdict.schema.json" },
+    "current_diff": { "type": "string" },
+    "root_cause_class": {
+      "enum": ["code_defect", "test_defect", "decomposition_defect", "design_defect", "spec_defect", "environment_flake", "integration_conflict", "unknown"],
+      "description": "Determines which stage the failure routes back to. Rules-first, LLM-assisted."
+    },
+    "root_cause_evidence": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Signals that produced the classification, e.g. 'same assertion failed for two different implementer agents'."
+    },
+    "prior_attempts": {
+      "type": "array",
+      "description": "Full history. Passed to every refinement run.",
+      "items": {
+        "type": "object",
+        "required": ["attempt", "outcome"],
+        "additionalProperties": false,
+        "properties": {
+          "attempt": { "type": "integer" },
+          "agent_role": { "type": "string" },
+          "model_tier": { "enum": ["T1", "T2", "T3"] },
+          "hypothesis": { "type": "string", "description": "The root cause the agent claimed before patching." },
+          "change_summary": { "type": "string" },
+          "diff_hash": { "type": "string" },
+          "diff_size_lines": { "type": "integer" },
+          "outcome": { "enum": ["resolved", "same_failure", "new_failure", "regressed", "timeout", "aborted"] },
+          "failure_signatures": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "falsified_hypotheses": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Explicitly forbidden to re-test."
+    },
+    "no_progress_signals": {
+      "type": "object",
+      "description": "Populated by the loop guard. Any true value escalates immediately rather than waiting for the attempt ceiling.",
+      "additionalProperties": false,
+      "properties": {
+        "identical_failure_signature": { "type": "boolean" },
+        "diff_oscillation": { "type": "boolean" },
+        "monotonic_diff_growth": { "type": "boolean" },
+        "failure_count_plateau": { "type": "boolean" },
+        "budget_burn_without_progress": { "type": "boolean" }
+      }
+    },
+    "budget_remaining": {
+      "type": "object",
+      "properties": {
+        "tokens": { "type": "integer" },
+        "usd": { "type": "number" },
+        "attempts": { "type": "integer" }
+      }
+    },
+    "escalation_rung": { "type": "integer", "minimum": 0, "maximum": 6 },
+    "routed_to": { "type": "string", "description": "Agent role or 'human' receiving this bundle." }
+  }
+}
