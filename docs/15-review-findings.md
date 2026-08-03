@@ -135,7 +135,37 @@ Consistent across all four seats:
 - Sizing the fleet backwards from the merge queue (§5.5).
 - §14.5's "move judgement to determinism or remove it" as the right evolutionary pressure.
 
-## 15.7 Status
+## 15.7 Remediation status
 
-Nothing in this document has been remediated. Under §7.5 the rejection stands until each
-clearance condition is met, and the review itself is incomplete until C10 reports.
+| Finding | Status | Where |
+|---|---|---|
+| F1 low-risk bench was four seats | **Fixed** — fifth judging seat is C4; C10 runs mechanically | §7.12 |
+| F2 Clerk/Chair judgement mislabelled | **Open** — needs a design decision | §16.9 |
+| F3 risk + root-cause classifiers undefined | **Fixed** | §16.1, §16.2 |
+| F4 tenure/succession deadlock and cost | **Fixed** — passing defined, adjudications staggered, ≤2 concurrent successions, exam retry ceiling | §7.8, §7.10 |
+| F5 no `ADJUDICATING → REPLAN` edge | **Fixed** | §1.3 |
+| F6 Gate C verdict merged stale | **Fixed** — `INTEGRATING → ADJUDICATING` on normalised-hash change | §1.3 invariant 7 |
+| F7 rollback did not cascade | **Fixed** | §1.3 invariant 6 |
+| F8 genesis probation unbounded | **Fixed** — ≤2 rounds per capability | §11.9 |
+| F9 amendment floor unreachable | **Fixed** — amendments always seat the full ten | §11.8 |
+| F10 C4's mandate unseated | **Fixed** — C4 is the fifth low-risk seat | §7.12 |
+| F11 spec gate / design gate unspecified | **Fixed** | §16.3 |
+| F12 Gate 2 unspecified | **Fixed** — owner, checks, human deadline | §16.3 |
+| F13 missing Architecture/Design schemas | **Fixed** | `schemas/` |
+| F14 `contract_conformance` undefined | **Fixed** | §16.4 |
+| F15 golden set undefined | **Fixed** | §16.5 |
+| F16 *q* had no estimator | **Fixed** — three estimators, clean-canary is the gate | §16.6 |
+| F17 unvalued thresholds | **Fixed** — valued, with basis, owner, and placeholder marking | §16.7 |
+| F18 Policy Engine unspecified | **Fixed** | §16.8 |
+| F19 control plane absent from rollout | **Open** | §16.9 |
+| F20 replay not achievable | **Open** | §16.9 |
+| F21 no tenancy model | **Open** | §16.9 |
+| F22 no cold-start path | **Open** | §16.9 |
+
+**18 of 22 fixed. Four remain open**, all architecture-level and requiring a decision rather
+than a correction. The recommended cuts in §15.5 are untouched: each implements an explicit
+user request, so removing them is a product decision, not a defect fix.
+
+**The review remains incomplete.** C10 never reported, so arithmetic, cross-reference
+integrity, and schema/doc drift are still unverified — including the arithmetic in §13 and
+§14, and whether this remediation introduced new inconsistencies.

@@ -182,7 +182,8 @@ flowchart TB
 
 | Element | Rule |
 |---|---|
-| Who votes | Every seated commissioner |
+| Bench | **Always the full ten.** Amendments change the system itself, so they are never adjudicated by a reduced bench — and the absolute floor below would otherwise be unreachable at five seats (§15 F9) |
+| Who votes | Every commissioner |
 | Options | `APPROVE`, `REJECT`, `ABSTAIN` (abstain permitted only outside the seat's jurisdiction) |
 | Threshold | **≥ 80% of non-abstaining votes** approve |
 | Absolute floor | **≥ 6 approvals** regardless of abstentions — prevents a 2-vote amendment passing on mass abstention |
@@ -226,6 +227,7 @@ one.
 | Bound | Value |
 |---|---|
 | Genesis tournaments in flight | ≤ 1 per capability, ≤ 3 fleet-wide |
+| **Genesis rounds per capability** | **≤ 2.** A second probation failure escalates to a human rather than re-opening with charter v3. Without this the probation loop is unbounded — the only loop in the design that was (§15 F8) |
 | Genesis cost ceiling | 3× the work order's budget; breach aborts to human |
 | Provisional roles active | ≤ 5 (each is an unproven component in production) |
 | Amendments per cycle | ≤ 10 docketed; the rest carry to the next cycle |

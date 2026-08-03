@@ -1,0 +1,202 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/design-decision.schema.json",
+  "title": "DesignDecision",
+  "description": "Output of the Design Agent. A contract in the same sense as the Architect's: frozen before implementation so the Frontend Implementer builds against a decision instead of inventing UX, and the Test Engineer can assert against defined states.",
+  "type": "object",
+  "required": [
+    "id",
+    "spec_id",
+    "flows",
+    "state_inventory",
+    "accessibility"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "spec_id": {
+      "type": "string"
+    },
+    "flows": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "steps"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "steps": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "criteria_covered": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      }
+    },
+    "state_inventory": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Every state every screen can be in, enumerated BEFORE any is styled. Unhandled empty and error states are the usual gap between 'the feature works' and 'the feature is usable'. The design gate checks that every acceptance criterion has a defined state here.",
+      "items": {
+        "type": "object",
+        "required": [
+          "screen",
+          "state",
+          "behaviour"
+        ],
+        "properties": {
+          "screen": {
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "empty",
+              "loading",
+              "partial",
+              "error",
+              "success",
+              "offline",
+              "unauthorised"
+            ]
+          },
+          "behaviour": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "copy": {
+            "type": "string",
+            "description": "User-facing string. Part of the deliverable \u2014 never left to the implementer."
+          }
+        }
+      }
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "source"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "source": {
+            "enum": [
+              "existing",
+              "new"
+            ]
+          },
+          "justification": {
+            "type": "string",
+            "description": "Required when source is 'new'. A new component enters the design system, not one feature."
+          },
+          "design_system_entry": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "interaction": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "trigger": {
+            "type": "string"
+          },
+          "validation": {
+            "type": "string"
+          },
+          "feedback": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "accessibility": {
+      "type": "object",
+      "required": [
+        "annotations"
+      ],
+      "description": "Every interactive element carries annotations \u2014 a guardrail, not a nice-to-have (docs/02 \u00a72.3.1).",
+      "properties": {
+        "annotations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "element": {
+                "type": "string"
+              },
+              "role": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "focus_order": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "contrast_verified": {
+          "type": "boolean"
+        },
+        "standard": {
+          "type": "string",
+          "default": "WCAG 2.2 AA"
+        }
+      }
+    },
+    "responsive": {
+      "type": "object",
+      "properties": {
+        "breakpoints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "behaviour": {
+          "type": "string"
+        }
+      }
+    },
+    "directions_offered": {
+      "type": "array",
+      "maxItems": 4,
+      "description": "On open-ended briefs, 3-4 distinct directions are proposed and a human chooses, rather than silently committing to one house style.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "rationale": {
+            "type": "string"
+          },
+          "chosen": {
+            "type": "boolean"
+          }
+        }
+      }
+    }
+  }
+}

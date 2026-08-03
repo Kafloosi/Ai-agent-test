@@ -124,14 +124,16 @@ stateDiagram-v2
     VERIFYING --> REVISION: gate failure, root cause = this task
     VERIFYING --> REPLAN: root cause = decomposition/design/spec
     VERIFYING --> ADJUDICATING: gates 0-2 pass, dossier sealed
-    ADJUDICATING --> APPROVED: Commission unanimous (10/10)
-    ADJUDICATING --> REVISION: ≥ 1 admissible dissent, whole dossier void
+    ADJUDICATING --> APPROVED: Commission unanimous
+    ADJUDICATING --> REVISION: dissent, root cause = this task
+    ADJUDICATING --> REPLAN: dissent, root cause = spec/design/decomposition
     ADJUDICATING --> ESCALATED: round ceiling or contradictory dissents
     REVISION --> IN_PROGRESS: refiner assigned, budget remains
     REVISION --> ESCALATED: budget or no-progress detector trips
     REPLAN --> PLANNED: upstream stage re-runs
     APPROVED --> INTEGRATING: merge queue
-    INTEGRATING --> MERGED: clean integration
+    INTEGRATING --> MERGED: clean integration, verdict still valid
+    INTEGRATING --> ADJUDICATING: rebase changed the normalised diff hash
     INTEGRATING --> REVISION: semantic or textual conflict
     MERGED --> RELEASED: canary healthy
     MERGED --> ROLLED_BACK: canary regression
@@ -155,6 +157,14 @@ stateDiagram-v2
 4. Only one work order per module-lease may be in `INTEGRATING` at a time.
 5. Every transition writes an event; the task graph is a projection of the event log and
    can be rebuilt from it.
+6. **Leaving `MERGED` cascades.** When a work order transitions `MERGED → ROLLED_BACK`, every
+   transitive dependent is marked for re-verification — `QUEUED` ones return to `PLANNED`,
+   in-flight ones return to `REVISION` with the revert in their failure bundle. Without this,
+   invariant 1 is violated silently: a dependent keeps building against code that no longer
+   exists (§15 F7).
+7. **A verdict does not survive a semantic rebase.** `INTEGRATING` returns to `ADJUDICATING`
+   whenever the rebase changes the normalised diff hash. Only a hash-identical rebase reuses
+   the Gate C verdict (§15 F6).
 
 ## 1.4 End-to-end sequence for a single work order
 

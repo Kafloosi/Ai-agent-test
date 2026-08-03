@@ -92,8 +92,8 @@ Seats **C2, C6 and C7 absorbed the former Gate 1 agents.** The Code Reviewer, Se
 and Performance Agent held the same jurisdictions as these seats and were adjudicating the same
 questions a second time at full price; they are now the seats themselves (§14 O1).
 
-**C10 is the meta-seat.** It does not judge the code; it judges whether the other nine were
-given enough to judge it. A dossier with a missing verdict, an unattributed claim, a
+**C10 is the meta-seat.** It does not judge the code; it judges whether the record is
+sufficient to judge it — mechanically below high risk, as an LLM seat above. A dossier with a missing verdict, an unattributed claim, a
 verdict issued against a stale base commit, or an attempt history with gaps is dissented by
 C10 regardless of how good the code is. Without this seat, the Commission can be defeated
 simply by feeding it an incomplete record.
@@ -268,15 +268,20 @@ flowchart LR
     SEAT["Seat C-n<br/>instance g"] --> ADJ["Adjudicate"]
     ADJ --> V{"Vote"}
     V -- DISSENT --> ADJ
-    V -- PASS --> CNT["passings += 1"]
+    V -- "PASS (admissible)" --> CNT["passings += 1<br/>regardless of the bench's overall verdict"]
     CNT --> T{"passings == 3<br/>or adjudications == 12?"}
     T -- no --> ADJ
-    T -- yes --> LOCK["Seat enters SUCCESSION<br/>(may not vote)"]
+    T -- yes --> CAP{"&lt; 2 seats already<br/>in SUCCESSION?"}
+    CAP -- no --> DEFER["Defer to next round"]
+    DEFER --> ADJ
+    CAP -- yes --> LOCK["Seat enters SUCCESSION<br/>(may not vote)"]
     LOCK --> PACK["Outgoing instance writes<br/>Precedent Pack"]
     PACK --> EXAM["Successor instance g+1<br/>sits the Bench Exam"]
     EXAM -- "≥ 11/12 sealed cases" --> SEATED["Successor seated<br/>outgoing retired"]
     EXAM -- fail --> DEF["Pack deficient →<br/>outgoing revises pack,<br/>tenure extended one round"]
-    DEF --> EXAM
+    DEF --> RETRY{"≤ 2 revisions?"}
+    RETRY -- yes --> EXAM
+    RETRY -- no --> HUM["Escalate to human"]
     EXAM -- "justified divergence" --> REV["Precedent revision proposal<br/>→ Supervisor + human"]
     REV --> SEATED
     SEATED --> ADJ
@@ -290,9 +295,12 @@ flowchart LR
 | Rule | Value | Rationale |
 |---|---|---|
 | Tenure | 3 passings | As specified. Forces frequent externalisation of knowledge |
+| **What counts as a passing** | An admissible PASS vote by *that seat* on a concluded round — **not** a 10/10 acceptance | §7.4's diagram previously credited tenure only on unanimous acceptance, contradicting this table and the schema. On a bench where one seat dissents per dossier, no seat would ever accrue a passing (§15 F4) |
 | Hard backstop | 12 adjudications regardless of outcome | A seat that only ever dissents would otherwise never rotate and would entrench indefinitely |
+| **Concurrent succession cap** | **≤ 2 seats in SUCCESSION at once** | Both counters advance in lockstep across seats, so without a cap the whole bench can lock in the same round and there is no state for "no bench" — work orders sit in ADJUDICATING forever (§15 F4). A seat due for succession while two are already locked defers to the next round |
+| **Bench-exam retry ceiling** | **2 revisions, then human** | §7.10's pack-revise loop had no ceiling |
 | Vote lock during succession | Seat cannot vote while in SUCCESSION | Prevents an outgoing instance ruling on work it will not be accountable for |
-| Staggered start | Seat *i* bootstraps with `i mod 3` prior passings | Prevents all ten seats rotating simultaneously and wiping institutional memory in one round |
+| Staggered start | Seat *i* bootstraps with `i mod 3` prior passings **and `i mod 12` prior adjudications** | Offsetting passings alone does not stagger the hard backstop, since every seated seat adjudicates the same dossiers (§15 F4) |
 | Inherited dissents | Successor inherits every open dissent of its seat | Guarantees no dissent is cleared by the simple expedient of waiting for its author to rotate out |
 | Retirement | Outgoing instance is destroyed after handoff | The seat's knowledge lives in the pack, not in a context window |
 
@@ -470,7 +478,7 @@ front of it makes integration throughput the binding constraint even sooner.
 
 | Risk class | Seated | Rationale |
 |---|---|---|
-| **Low** | **C1, C2, C3, C8, C10** | The five jurisdictions with no deterministic backstop |
+| **Low** | **C1, C2, C3, C4, C8** — five judging seats | See below |
 | Medium | All ten | — |
 | High | All ten, T3, plus human sign-off | — |
 
@@ -478,7 +486,13 @@ front of it makes integration throughput the binding constraint even sooner.
 everything.** Bench composition governs which seats are seated, never whether a seated
 seat's dissent binds.
 
-The five retained seats are not an arbitrary subset. They are exactly the jurisdictions that
+**C10 is not a judging seat below high risk** (§14 O2) — its checks run mechanically in the
+Clerk before sealing. The fifth judging seat is therefore **C4 (Method & Skills)**, which also
+restores one of the four concerns the Commission was created to catch. Earlier revisions of
+this document listed C10 as the fifth seat while O2 had already demoted it, leaving four
+judging seats against a stated floor of five (§15 F1, F10).
+
+The retained seats are not an arbitrary subset. They are the jurisdictions that
 **nothing deterministic can cover** — whether the work meets the requirement (C1), actually
 functions (C2), is fixed rather than worked around (C3), rests on real tests (C8), and is
 backed by a complete record (C10). Each of the five dropped seats has a Gate 0 check standing
@@ -486,8 +500,8 @@ behind it:
 
 | Dropped seat | Deterministic backstop |
 |---|---|
-| C4 Method & Skills | Tool/skill invocation log; protected-path check |
-| C5 Contract & Architecture | Gate 0 `contract_conformance` |
+| C5 Contract & Architecture | Gate 0 `contract_conformance` (§16.4) |
+| C10 Evidence & Process | Clerk mechanical validation, pre-seal (§14 O2) |
 | C6 Security & Privacy | Gate 0 SAST / SCA / secrets / licence, **plus mandatory promotion to full bench on any security-relevant path** |
 | C7 Performance & Cost | Measured budgets, not judgement — a breach is a Gate 0 failure |
 | C9 Operability | Migrations, IaC, CI and flag changes force promotion to full bench |

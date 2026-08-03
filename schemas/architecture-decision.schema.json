@@ -1,0 +1,225 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/architecture-decision.schema.json",
+  "title": "ArchitectureDecision",
+  "description": "Output of the Architect. Frozen before parallel implementation begins \u2014 every implementer builds against it rather than guessing, so it is the single most load-bearing contract in the design. It had no schema while sixteen lesser artifacts did (docs/15 F13).",
+  "type": "object",
+  "required": [
+    "id",
+    "spec_id",
+    "components",
+    "contracts",
+    "risk_register",
+    "adrs"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": "string"
+    },
+    "spec_id": {
+      "type": "string"
+    },
+    "components": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "responsibility"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "responsibility": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "owns_contracts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "criteria_covered": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Acceptance criterion ids. Every criterion in the spec must map to at least one component \u2014 checked at the design gate."
+          }
+        }
+      }
+    },
+    "contracts": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Machine-validatable interface definitions. Frozen: an implementer reports a deviation, never takes one.",
+      "items": {
+        "type": "object",
+        "required": [
+          "uri",
+          "format",
+          "version"
+        ],
+        "properties": {
+          "uri": {
+            "type": "string"
+          },
+          "format": {
+            "enum": [
+              "openapi",
+              "graphql_sdl",
+              "protobuf",
+              "json_schema",
+              "typed_module"
+            ]
+          },
+          "version": {
+            "type": "string"
+          },
+          "content_hash": {
+            "type": "string"
+          },
+          "frozen_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "data_model_delta": {
+      "type": "object",
+      "properties": {
+        "changes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "migration_strategy": {
+          "enum": [
+            "expand_contract",
+            "additive_only",
+            "none"
+          ]
+        },
+        "destructive": {
+          "type": "boolean",
+          "description": "True forces risk_class high and human approval."
+        }
+      }
+    },
+    "adrs": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": [
+          "decision",
+          "rationale",
+          "rejected"
+        ],
+        "properties": {
+          "decision": {
+            "type": "string"
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 400
+          },
+          "rejected": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "option": {
+                  "type": "string"
+                },
+                "why_not": {
+                  "type": "string",
+                  "maxLength": 200
+                }
+              }
+            },
+            "description": "Recording why the alternatives lost is what makes the decision reviewable later."
+          },
+          "reversible": {
+            "type": "boolean",
+            "description": "False requires human sign-off (docs/02 \u00a72.3)."
+          }
+        }
+      }
+    },
+    "risk_register": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "area",
+          "risk_class",
+          "mitigation"
+        ],
+        "properties": {
+          "area": {
+            "type": "string"
+          },
+          "risk_class": {
+            "enum": [
+              "low",
+              "medium",
+              "high"
+            ]
+          },
+          "mitigation": {
+            "type": "string",
+            "description": "Required on every high-risk area \u2014 checked at the design gate."
+          }
+        }
+      }
+    },
+    "nfr_budgets": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "metric": {
+            "type": "string"
+          },
+          "budget": {
+            "type": "number"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "component": {
+            "type": "string"
+          }
+        },
+        "description": "Consumed by seat C7. A breach is a measured Gate 0 failure, not a judgement."
+      }
+    },
+    "new_dependencies": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "version": {
+            "type": "string"
+          },
+          "licence": {
+            "type": "string"
+          },
+          "sca_cleared": {
+            "type": "boolean"
+          }
+        },
+        "description": "Any entry forces risk_class high (docs/16 \u00a716.1)."
+      }
+    }
+  }
+}

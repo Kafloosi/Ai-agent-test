@@ -7,12 +7,13 @@
   "required": ["gate", "work_order_id", "base_commit", "patch_hash", "result", "issued_at"],
   "additionalProperties": false,
   "properties": {
-    "gate": { "enum": ["gate0", "gate2", "gateC"] },
+    "gate": { "enum": ["spec", "design", "gate0", "gate2", "gateC"] },
     "work_order_id": { "type": "string" },
     "attempt": { "type": "integer", "minimum": 1 },
     "base_commit": { "type": "string" },
     "patch_hash": { "type": "string" },
     "result": { "enum": ["pass", "fail", "blocked_pending_human"] },
+    "deadline": { "type": "string", "format": "date-time", "description": "Required when result is blocked_pending_human. On expiry the work order escalates to the approver's escalation contact; it never merges by default and never waits forever (docs/16 §16.3)." },
     "issued_at": { "type": "string", "format": "date-time" },
     "signature": { "type": "string", "description": "Prevents a verdict being forged or edited by an agent." },
     "checks": {
