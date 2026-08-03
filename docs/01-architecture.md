@@ -23,7 +23,7 @@ flowchart TB
         direction LR
         L0["L0 Definition<br/>Analyst · Architect · Decomposer"]
         L1["L1 Construction<br/>Implementers · Test Engineer"]
-        L2["L2 Judgement<br/>Reviewer · Security · Performance"]
+        L2["L2 Judgement<br/>Reviewer · Security · Performance<br/>Commission — 10 seats, unanimous"]
         L3["L3 Delivery<br/>Refiner · Integrator · Docs · Release"]
     end
 
@@ -123,7 +123,10 @@ stateDiagram-v2
     SUBMITTED --> VERIFYING: gates running
     VERIFYING --> REVISION: gate failure, root cause = this task
     VERIFYING --> REPLAN: root cause = decomposition/design/spec
-    VERIFYING --> APPROVED: all gates pass
+    VERIFYING --> ADJUDICATING: gates 0-2 pass, dossier sealed
+    ADJUDICATING --> APPROVED: Commission unanimous (10/10)
+    ADJUDICATING --> REVISION: ≥ 1 admissible dissent, whole dossier void
+    ADJUDICATING --> ESCALATED: round ceiling or contradictory dissents
     REVISION --> IN_PROGRESS: refiner assigned, budget remains
     REVISION --> ESCALATED: budget or no-progress detector trips
     REPLAN --> PLANNED: upstream stage re-runs
@@ -145,7 +148,10 @@ stateDiagram-v2
 1. A work order in `QUEUED` has all `depends_on` in `MERGED` or `RELEASED`.
 2. `attempts` increments on every entry to `IN_PROGRESS`; entering with
    `attempts >= max_attempts` is impossible — the transition goes to `ESCALATED`.
-3. `APPROVED` requires a signed verdict from every gate applicable to the risk class.
+3. `APPROVED` requires a signed verdict from every gate applicable to the risk class **and**
+   a unanimous `CommissionVerdict` from every seated commissioner (§7). A single admissible
+   dissent returns the work order to `REVISION` with no part of the dossier carried forward
+   as approved.
 4. Only one work order per module-lease may be in `INTEGRATING` at a time.
 5. Every transition writes an event; the task graph is a projection of the event log and
    can be rebuilt from it.

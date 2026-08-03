@@ -104,6 +104,8 @@ mean the system is broken.
 | Merge queue growth | depth increasing for > 30 min | Reduce implementer WIP; investigate main-line health |
 | Main line red | any | **Global halt on merges**; all capacity to the fix |
 | Escalation rate | > 20% of work orders | Decomposition or spec quality problem; stop and re-plan |
+| Commission rejection rate | > 40% of dossiers rejected round 1 | Either upstream quality collapsed or a seat has drifted; check per-seat *q* before touching the pipeline (§7.12) |
+| Commission seat drift | dissent precision < 0.7, or generation delta ≤ 0 sustained | Trip breaker on the seat, revert to the prior generation's Precedent Pack, human review (§7.11) |
 
 **Circuit breakers** follow closed → open → half-open. Opening a breaker drains in-flight
 work rather than killing it, parks new work, and alerts. Only a human closes a breaker that
@@ -170,3 +172,5 @@ Rules:
 | **No infinite loops** | Attempt ceilings + no-progress detector + non-repeating escalation ladder |
 | **Recoverable from crash** | Workers stateless; leases expire; worktrees rebuilt from pinned commits |
 | **Auditable** | Every decision — including LLM routing choices — is logged with its justification and the artifact hashes it saw |
+| **No unilateral acceptance** | Final approval requires unanimous consent from every seated commissioner against a sealed dossier; one dissent voids the whole adjudication (§7.5) |
+| **No standard drift across generations** | Commission succession is validated by bench exam against sealed ground truth, not against the predecessor's account of it (§7.10) |

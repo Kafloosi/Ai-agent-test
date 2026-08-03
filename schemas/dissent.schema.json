@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/dissent.schema.json",
+  "title": "Dissent",
+  "description": "A single commissioner's objection. One admissible dissent voids the entire adjudication. The remediation_condition is mandatory and load-bearing: a dissent without an objectively checkable clearance condition is an unfalsifiable objection, and ten agents empowered to raise unfalsifiable objections never converge.",
+  "type": "object",
+  "required": ["seat", "generation", "work_order_id", "round", "jurisdiction", "failure_statement", "evidence", "remediation_condition"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "seat": {
+      "enum": ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10"]
+    },
+    "generation": { "type": "integer", "minimum": 1, "description": "Which instance generation of this seat raised it. Successors inherit open dissents." },
+    "work_order_id": { "type": "string" },
+    "round": { "type": "integer", "minimum": 1, "maximum": 3 },
+    "dossier_hash": { "type": "string", "description": "The sealed record this vote was cast against. A dissent against a stale dossier is inadmissible." },
+    "jurisdiction": {
+      "enum": ["requirements", "correctness", "completion", "method_and_skills", "contract_and_architecture", "security_and_privacy", "performance_and_cost", "test_integrity", "operability", "evidence_and_process"],
+      "description": "Must match the seat's assigned jurisdiction. Out-of-jurisdiction dissents are ruled void by the Chair."
+    },
+    "failure_statement": {
+      "type": "string",
+      "description": "What breaks, for whom, under what input or condition. Not a preference, not a suggestion."
+    },
+    "evidence": {
+      "type": "array",
+      "minItems": 1,
+      "description": "At least one citation. Unsupported dissents are void.",
+      "items": {
+        "type": "object",
+        "required": ["kind", "ref"],
+        "properties": {
+          "kind": { "enum": ["file_line", "verdict_field", "dossier_artifact", "precedent", "test_result", "metric"] },
+          "ref": { "type": "string" },
+          "excerpt": { "type": "string" }
+        }
+      }
+    },
+    "remediation_condition": {
+      "type": "string",
+      "description": "\"This dissent clears when X is true.\" Must be objectively checkable. Functions as an additional acceptance criterion."
+    },
+    "severity_note": { "type": "string", "description": "Advisory only. All admissible dissents block equally — there is no partial acceptance." },
+    "admissibility": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "ruling": { "enum": ["admissible", "void_out_of_jurisdiction", "void_no_evidence", "void_no_remediation_condition", "void_restates_passing_check", "void_stale_dossier"] },
+        "ruled_by": { "const": "chair", "description": "Deterministic filter, not an agent." },
+        "ruled_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "status": {
+      "enum": ["RAISED", "VOID", "OPEN", "ROUTED", "REMEDIATING", "SUBMITTED", "CLEARED", "DISPUTED", "ARBITRATION", "ESCALATED"]
+    },
+    "routed_to": { "type": "string", "description": "Stage assigned by the root-cause classifier: refiner, architect, analyst, test_engineer, decomposer." },
+    "cleared_by": {
+      "type": "object",
+      "description": "Only the issuing seat or its successor may clear. Never the remediating agent, the Orchestrator, or another commissioner.",
+      "properties": {
+        "seat": { "type": "string" },
+        "generation": { "type": "integer" },
+        "cleared_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "dispute": {
+      "type": "object",
+      "description": "Raised by a remediating agent asserting the dissent is itself wrong. Resolved by human arbitration; the outcome feeds the seat's calibration record.",
+      "properties": {
+        "argument": { "type": "string" },
+        "evidence": { "type": "array", "items": { "type": "string" } },
+        "outcome": { "enum": ["upheld", "overturned", "pending"] }
+      }
+    },
+    "contradicts": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Ids of open dissents whose remediation conditions cannot simultaneously hold. Detected by the Chair; routes straight to human arbitration without spending a remediation attempt."
+    }
+  }
+}

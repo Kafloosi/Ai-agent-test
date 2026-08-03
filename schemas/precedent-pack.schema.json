@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/precedent-pack.schema.json",
+  "title": "PrecedentPack",
+  "description": "The product of a commissioner's tenure, transmitted to its successor after three passings. The instance is disposable; the pack is the asset. It must be sufficient on its own — the successor is seated only after reproducing established outcomes on sealed historical cases without access to its predecessor.",
+  "type": "object",
+  "required": ["seat", "generation", "tenure", "approved_patterns", "rejected_patterns", "calibration"],
+  "additionalProperties": false,
+  "properties": {
+    "seat": { "enum": ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10"] },
+    "generation": { "type": "integer", "minimum": 1 },
+    "outgoing_instance": { "type": "string" },
+    "successor_instance": { "type": "string" },
+    "tenure": {
+      "type": "object",
+      "required": ["passings", "adjudications"],
+      "properties": {
+        "passings": { "type": "integer", "description": "Admissible PASS votes. Tenure is 3." },
+        "adjudications": { "type": "integer", "description": "Total rounds participated in. Hard backstop at 12 forces rotation even for a seat that only ever dissents." },
+        "dissents_raised": { "type": "integer" },
+        "started_at": { "type": "string", "format": "date-time" },
+        "ended_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "approved_patterns": {
+      "type": "array",
+      "description": "What gets a PASS, and why. Citations are mandatory so a successor can read the actual cases.",
+      "items": {
+        "type": "object",
+        "required": ["pattern", "why_it_passes", "citations"],
+        "properties": {
+          "pattern": { "type": "string" },
+          "why_it_passes": { "type": "string" },
+          "citations": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+        }
+      }
+    },
+    "rejected_patterns": {
+      "type": "array",
+      "description": "What does not get approved. Fed back into Implementer and Refiner context packs so the fleet learns the standard and first-round dissent rate falls over time.",
+      "items": {
+        "type": "object",
+        "required": ["pattern", "why_it_fails", "citations"],
+        "properties": {
+          "pattern": { "type": "string" },
+          "why_it_fails": { "type": "string" },
+          "remediation_that_worked": { "type": "string", "description": "Turns the Commission from a gate that says no into a body that teaches what yes looks like." },
+          "citations": { "type": "array", "minItems": 1, "items": { "type": "string" } }
+        }
+      }
+    },
+    "calibration": {
+      "type": "object",
+      "required": ["dissents_upheld", "dissents_overturned", "dissents_ruled_inadmissible"],
+      "description": "The seat's record of being wrong. A successor inheriting this starts calibrated instead of repeating the same errors for three more rounds.",
+      "properties": {
+        "dissents_upheld": { "type": "integer" },
+        "dissents_overturned": { "type": "integer" },
+        "dissents_ruled_inadmissible": { "type": "integer" },
+        "inadmissibility_causes": { "type": "array", "items": { "type": "string" } },
+        "precision": { "type": "number", "minimum": 0, "maximum": 1, "description": "upheld ÷ (upheld + overturned). Below 0.7 the seat is noisy and blocking good work." },
+        "escaped_defects": { "type": "integer", "description": "Production defects in this seat's jurisdiction that it passed. Any value above 0 means too lenient." },
+        "false_dissent_rate_q": { "type": "number", "description": "Spurious dissent probability on genuinely good work. The Commission's vital sign: clean work is accepted with probability (1-q)^10." }
+      }
+    },
+    "jurisdiction_notes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Boundary cases where this seat nearly encroached on another's jurisdiction."
+    },
+    "binding_precedents": {
+      "type": "array",
+      "description": "Human arbitration rulings. Written into the packs of both seats involved in a contradiction so the same conflict is resolved by precedent next time rather than by another human.",
+      "items": {
+        "type": "object",
+        "required": ["ruling", "source"],
+        "properties": {
+          "ruling": { "type": "string" },
+          "source": { "type": "string" },
+          "supersedes": { "type": "string" }
+        }
+      }
+    },
+    "open_questions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Cases this instance ruled inconsistently on, handed forward honestly rather than hidden."
+    },
+    "bench_exam": {
+      "type": "object",
+      "description": "Successor's validated handoff. Graded against sealed ground truth, never against the predecessor's pack — otherwise succession degrades into a game of telephone.",
+      "properties": {
+        "cases_presented": { "type": "integer", "default": 12 },
+        "matches_required": { "type": "integer", "default": 11 },
+        "matches_achieved": { "type": "integer" },
+        "result": { "enum": ["seated", "pack_deficient", "precedent_revision_proposed"] },
+        "divergences": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "case_id": { "type": "string" },
+              "established_outcome": { "type": "string" },
+              "successor_outcome": { "type": "string" },
+              "justification": { "type": "string" },
+              "ruling": { "enum": ["successor_wrong", "precedent_wrong_revise", "pending_human"] }
+            }
+          }
+        }
+      }
+    }
+  }
+}

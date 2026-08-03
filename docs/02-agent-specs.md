@@ -280,7 +280,23 @@ generate plausible-sounding, unfalsifiable objections and stall the loop.
 
 ---
 
-## 2.17 Human roles (not agents, but part of the design)
+## 2.17 The Commission (10 seats)
+
+Specified in full in [`07-commission.md`](07-commission.md). Summarised here because it is
+the final authority over everything the agents above produce.
+
+| Field | Specification |
+|---|---|
+| **Role** | Adjudicate, unanimously, whether work is genuinely acceptable — not merely green |
+| **Inputs** | A sealed Case Dossier assembled by a deterministic Clerk: work order, criteria, diff, all gate verdicts, attempt history, tools and skills used, applicable precedent |
+| **Outputs** | `CommissionVerdict` (ACCEPTED / REJECTED), `Dissent[]` with clearance conditions, tenure updates, `PrecedentPack` at succession |
+| **Design logic** | Ten disjoint jurisdictions, blind parallel voting, deterministic admissibility filter, unanimity required. Each seat serves three passings, then transmits a validated Precedent Pack to a successor |
+| **Model tier** | T2 (C3, C4, C7, C9), T3 (C1, C2, C5, C6, C8, C10) |
+| **Tools** | Read-only: repo, verdicts, contracts, precedent corpus |
+| **Guardrails** | No write access; may not dissent outside jurisdiction; may not author the fix it later judges; may not vote while in succession; may not clear another seat's dissent |
+| **Exit criteria** | Unanimous PASS from every seated commissioner against the current sealed dossier |
+
+## 2.18 Human roles (not agents, but part of the design)
 
 | Checkpoint | Trigger | Decision required |
 |---|---|---|
@@ -288,6 +304,7 @@ generate plausible-sounding, unfalsifiable objections and stall the loop.
 | Design approval | `risk_class = high`, irreversible decisions, new dependencies | Accept or redirect the architecture |
 | Security sign-off | Auth, payments, PII, crypto diffs | Accept residual risk |
 | Escalation | Loop budget exhausted or no-progress detected | Unblock, re-scope, or cancel |
+| Commission arbitration | Contradictory dissents, disputed dissent, or 3 rounds exhausted | Rule between seats; the ruling becomes binding precedent |
 | Release approval | Production changes above risk threshold | Authorise rollout |
 | Lesson promotion | Supervisor proposes a prompt change | Approve library change |
 

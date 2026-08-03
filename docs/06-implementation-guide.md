@@ -39,10 +39,11 @@ flowchart LR
     P3["Phase 3 — Planning layer<br/>+ Analyst, Architect, Decomposer<br/>(parallel DAG execution begins)"] --> P4
     P4["Phase 4 — Loops<br/>+ Refiner, root-cause classifier,<br/>escalation ladder, budgets"] --> P5
     P5["Phase 5 — Delivery<br/>+ Integrator, merge queue,<br/>Release agent, flags, canary"] --> P6
-    P6["Phase 6 — Scale &amp; learn<br/>+ Supervisor, lesson store,<br/>eval harness, model cascade"]
+    P6["Phase 6 — Scale &amp; learn<br/>+ Supervisor, lesson store,<br/>eval harness, model cascade"] --> P7
+    P7["Phase 7 — Commission<br/>+ 10 seats, unanimity, dissent ledger,<br/>tenure &amp; succession, precedent corpus"]
 
     style P1 fill:#0d2a4a,color:#fff
-    style P6 fill:#1f6f43,color:#fff
+    style P7 fill:#4a1d5c,color:#fff
 ```
 
 | Phase | Ship criterion before moving on |
@@ -53,9 +54,17 @@ flowchart LR
 | 4 | Escalation rate lands in the 5–15% band; no loop exceeds its budget |
 | 5 | Rollback exercised in production at least once, deliberately |
 | 6 | A prompt change has been promoted *and* rolled back via the eval harness |
+| 7 | Per-seat false-dissent rate *q* measured below 0.01, and at least one full succession cycle (pack → bench exam → seating) completed |
 
 Phase 2 is the one teams skip and later regret. Until the implementer is mechanically
 prevented from editing acceptance tests, green results carry no information.
+
+The Commission comes **last** for a reason. It is a quality amplifier, not a quality
+substitute: ten unanimous judges in front of a pipeline whose deterministic gates are
+untrusted or whose work orders are badly sized will reject nearly everything, and the
+rejections will be correct. Standing it up before phase 6 produces a Commission that spends
+its tenure re-discovering that the upstream stages are broken — at ten LLM calls per
+discovery. Build the gates first, then add the body that judges what survives them.
 
 ## 6.3 Instrumentation
 
@@ -69,6 +78,8 @@ trace: work_order_id
 ├── span: gate1               attrs: findings_by_severity, blocking, agent_role
 ├── span: gate2               attrs: acceptance_pass, human_wait_ms
 ├── span: refinement          attrs: attempt, root_cause_class, progress_detected, escalation_rung
+├── span: gateC_adjudication  attrs: round, bench, dossier_hash, votes, admissible_dissents,
+│                                    void_dissents, contradiction, seat_generations
 └── span: integration         attrs: rebase_conflicts, queue_wait_ms, semantic_conflict
 ```
 
@@ -82,6 +93,9 @@ Dashboards that matter, in priority order:
    (spec/design/decomposition) quality is degrading, not coding quality.
 5. **Escaped defect rate** — the constraint that may never be traded for speed.
 6. **Human touches per work order** — the honest measure of autonomy.
+7. **Commission health** — per-seat false-dissent rate *q*, dissent precision, and
+   first-round acceptance `(1 − q)^10`. A rising *q* silently strangles throughput before
+   it shows up anywhere else, because every rejection looks individually justified.
 
 ## 6.4 Anti-patterns
 
@@ -104,6 +118,12 @@ prevents each.
 | Scaling implementers to fix slowness | Integration is the bottleneck; more WIP means more conflicts | Size from merge queue backwards (§5.5) |
 | Agents with open network egress and repo credentials | Exfiltration path | Egress allowlist + least-privilege scoping (§5.4) |
 | Removing the human gate early | Compounding errors in irreversible places | Risk-class-driven approval (§3.2, §2.17) |
+| Ten judges all asked "is this good?" | Correlated opinions, endless overlap, near-certain deadlock at ten times the cost | Disjoint jurisdictions per seat (§7.3) |
+| Judges voting sequentially or seeing each other's votes | Commission collapses to its first voter — one opinion with nine echoes | Blind parallel voting (§7.4) |
+| Dissent without a clearance condition | Unfalsifiable objection under a unanimity rule = permanent block | Mandatory remediation condition (§7.4) |
+| Letting the remediator mark a dissent resolved | The objection is closed by the party it was raised against | Clearance only by the issuing seat or successor (§7.5) |
+| Succession by paraphrase | Standards drift generation over generation with nothing detecting it | Bench exam graded against sealed ground truth (§7.10) |
+| Commission with no canary dossiers | A silently lenient gate is indistinguishable from a healthy one | Planted-defect canaries (§7.13) |
 
 ## 6.5 What stays human, permanently
 

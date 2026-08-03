@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/commission-verdict.schema.json",
+  "title": "CommissionVerdict",
+  "description": "Outcome of one adjudication round at Gate C. Unanimity is required: ten PASS votes accept, one admissible DISSENT rejects the entire dossier. There is no partial acceptance and no state between ACCEPTED and REJECTED.",
+  "type": "object",
+  "required": ["work_order_id", "round", "dossier_hash", "seats", "result", "issued_at"],
+  "additionalProperties": false,
+  "properties": {
+    "work_order_id": { "type": "string" },
+    "round": { "type": "integer", "minimum": 1, "maximum": 3, "description": "Round ceiling is 3; exhausting it escalates to human arbitration with the full ledger." },
+    "dossier_hash": {
+      "type": "string",
+      "description": "Hash of the sealed Case Dossier assembled by the deterministic Clerk. All seats judge the identical record; the dossier is re-sealed every round."
+    },
+    "bench_composition": {
+      "enum": ["full", "reduced"],
+      "description": "Which seats were seated for this risk class. Governs seating only — never whether a seated seat's dissent is binding."
+    },
+    "seats": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 10,
+      "items": {
+        "type": "object",
+        "required": ["seat", "generation", "vote"],
+        "additionalProperties": false,
+        "properties": {
+          "seat": { "enum": ["C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10"] },
+          "generation": { "type": "integer", "minimum": 1 },
+          "instance_id": { "type": "string" },
+          "vote": { "enum": ["PASS", "DISSENT", "RECUSED"] },
+          "recusal_reason": { "type": "string", "description": "A seat in SUCCESSION may not vote." },
+          "rationale": { "type": "string" },
+          "dissent_ids": { "type": "array", "items": { "type": "string" } },
+          "model_tier": { "enum": ["T2", "T3"] },
+          "voted_blind": {
+            "type": "boolean",
+            "const": true,
+            "description": "Seats vote in parallel without visibility of each other's votes or reasoning. Sequential or visible voting collapses the Commission to its first voter."
+          }
+        }
+      }
+    },
+    "result": { "enum": ["ACCEPTED", "REJECTED", "ARBITRATION_REQUIRED"] },
+    "admissible_dissents": { "type": "array", "items": { "type": "string" } },
+    "void_dissents": { "type": "array", "items": { "type": "string" }, "description": "Ruled inadmissible by the Chair. Do not block; logged against the seat's calibration record." },
+    "contradiction_detected": {
+      "type": "boolean",
+      "description": "Two open dissents whose remediation conditions cannot both hold. Routes to human arbitration without spending a remediation attempt."
+    },
+    "dissent_ledger": {
+      "type": "array",
+      "description": "Every dissent ever raised on this work order, across all rounds, with current status. Visible to seats on re-adjudication so a fix that resolves one dissent by violating another is caught immediately.",
+      "items": { "$ref": "https://example.com/schemas/dissent.schema.json" }
+    },
+    "tenure_updates": {
+      "type": "array",
+      "description": "Passings credited by this round. A passing is an admissible PASS vote; three passings trigger succession.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "seat": { "type": "string" },
+          "passings": { "type": "integer" },
+          "adjudications": { "type": "integer" },
+          "enters_succession": { "type": "boolean" }
+        }
+      }
+    },
+    "issued_at": { "type": "string", "format": "date-time" },
+    "signature": { "type": "string" }
+  }
+}

@@ -15,6 +15,7 @@ on escaped-defect rate.** Quality is a constraint, not a term to be traded away.
 | **Escaped defect rate** | production defects ÷ merged work orders | **floor — never traded** |
 | Human touches per work order | interventions ÷ merges | ↓ |
 | Escalation rate | escalated ÷ total | 5–15% band |
+| Commission first-round acceptance | dossiers accepted 10/10 on round 1 | ↑ — falling means either quality regression or seat drift (§7.11) |
 
 ## 5.2 Cost optimisation
 

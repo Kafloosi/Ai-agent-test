@@ -20,6 +20,11 @@ Four principles drive every decision in this design:
 4. **State lives outside the agents.** Agents are stateless workers over a durable
    task graph. That is what makes the system restartable, parallelisable, and
    horizontally scalable.
+5. **Final acceptance is unanimous, and its judges are term-limited.** A ten-seat
+   [Commission](docs/07-commission.md) holds absolute authority at the last gate: one
+   dissent voids everything until the objection is fixed. Each seat serves three passings,
+   then hands a validated Precedent Pack to a successor — so the standard compounds across
+   generations instead of dying with an agent's context window.
 
 ## Documentation map
 
@@ -31,6 +36,7 @@ Four principles drive every decision in this design:
 | [`docs/04-failure-handling.md`](docs/04-failure-handling.md) | Failure taxonomy, retry/escalation ladder, circuit breakers, rollback |
 | [`docs/05-optimization-and-scaling.md`](docs/05-optimization-and-scaling.md) | Cost/latency/quality optimisation, scaling model, capacity and governance |
 | [`docs/06-implementation-guide.md`](docs/06-implementation-guide.md) | Stack choices, phased rollout, metrics, anti-patterns |
+| [`docs/07-commission.md`](docs/07-commission.md) | The Commission: ten-seat unanimous adjudication, dissent lifecycle, tenure and succession |
 | [`schemas/`](schemas/) | JSON Schemas for the message contracts between agents |
 
 ## Master flowchart
@@ -77,7 +83,21 @@ flowchart TB
         GATE2 -- fail --> RC
     end
 
-    subgraph LOOP["⑤ Refinement Loop"]
+    subgraph COMM["⑤ The Commission — unanimous final authority"]
+        GATE2 -- pass --> CLERK["Clerk seals Case Dossier<br/>(deterministic)"]
+        CLERK --> BENCH["10 seats vote blind, in parallel<br/>C1 Requirements · C2 Correctness · C3 Completion<br/>C4 Method &amp; Skills · C5 Contract · C6 Security<br/>C7 Performance · C8 Test Integrity · C9 Operability<br/>C10 Evidence"]
+        BENCH --> CHAIR["Chair: admissibility filter<br/>jurisdiction · evidence · remediation condition"]
+        CHAIR --> UNAN{"Unanimous?"}
+        UNAN -- "≥ 1 admissible dissent" --> VOIDED["REJECTED — entire dossier void<br/>no partial acceptance"]
+        VOIDED --> RC
+        UNAN -- "10 × PASS" --> TEN["Tenure += 1 per passing seat"]
+        TEN --> SUCC{"3 passings?"}
+        SUCC -- yes --> PACK["Precedent Pack → Bench Exam →<br/>successor seated, predecessor retired"]
+        SUCC -- no --> ACCEPTED["ACCEPTED"]
+        PACK --> ACCEPTED
+    end
+
+    subgraph LOOP["⑥ Refinement Loop"]
         RC{"Root-cause<br/>classifier"}
         RC -- "code defect" --> REF["Refiner / Repair Agent"]
         REF --> BUDGET{"attempts &lt; N<br/>and budget left<br/>and progress made?"}
@@ -93,19 +113,20 @@ flowchart TB
         HUMAN3 --> ORCH
     end
 
-    subgraph SHIP["⑥ Integration &amp; Release"]
-        GATE2 -- pass --> INTEG["Integrator<br/>merge queue · semantic conflicts"]
+    subgraph SHIP["⑦ Integration &amp; Release"]
+        ACCEPTED --> INTEG["Integrator<br/>merge queue · semantic conflicts"]
         INTEG -- "conflict" --> RC
         INTEG -- merged --> DOC["Documentation Agent"]
         DOC --> REL["Release Agent<br/>flags · canary · rollback"]
         REL --> DONE(["Released"])
     end
 
-    subgraph LEARN["⑦ Learning &amp; Supervision"]
+    subgraph LEARN["⑧ Learning &amp; Supervision"]
         SUP["Supervisor / Meta-agent"]
         DONE --> SUP
         ESC --> SUP
         SUP --> LESSON[("Lesson store:<br/>rules, checklists, evals")]
+        PACK -.->|"rejected patterns"| LESSON
         LESSON -.->|"injected into prompts"| POOL
         LESSON -.-> ARCH
         LESSON -.-> TE
@@ -116,6 +137,10 @@ flowchart TB
     style GATE0 fill:#1f6f43,color:#fff
     style GATE1 fill:#8a6d1f,color:#fff
     style GATE2 fill:#7a3b8f,color:#fff
+    style COMM fill:#2b0f36,color:#fff
+    style BENCH fill:#4a1d5c,color:#fff
+    style VOIDED fill:#a33,color:#fff
+    style ACCEPTED fill:#1f6f43,color:#fff
     style RC fill:#a33,color:#fff
     style DONE fill:#1f6f43,color:#fff
 ```
@@ -132,10 +157,17 @@ Every patch runs the **Gate 0** deterministic suite, then LLM **Gate 1** review
 risky classes. Any failure is classified by root cause and routed back to the *specific*
 stage that caused it — code, tests, decomposition, design, or spec — under a hard attempt
 and budget ceiling with no-progress detection. Exhausted loops climb an escalation ladder
-(retry → stronger model → repair specialist → re-plan → human). Merges pass through a
-serialised **merge queue** with semantic-conflict detection, ship behind feature flags with
-automated rollback, and every escalation deposits a **lesson** that is injected into future
-agent prompts and added to the evaluation suite.
+(retry → stronger model → repair specialist → re-plan → human). Work that survives all three
+gates then faces the **Commission**: ten seats with disjoint jurisdictions — requirements,
+correctness, completion, method and skills, contracts, security, performance, test
+integrity, operability, and evidence — voting blind and in parallel, where a single
+admissible dissent voids the entire adjudication until that point is fixed. Each seat serves
+**three passings**, then hands a **Precedent Pack** of what it approved and what it rejected
+to a successor that must reproduce established rulings on sealed historical cases before
+being seated. Accepted work passes through a serialised **merge queue** with
+semantic-conflict detection, ships behind feature flags with automated rollback, and every
+escalation and rejected pattern deposits a **lesson** that is injected into future agent
+prompts and added to the evaluation suite.
 
 ## Quick reference: agents at a glance
 
@@ -152,10 +184,25 @@ agent prompts and added to the evaluation suite.
 | Security Agent | Diff, threat model, deps | Vulnerability findings | **Hard block** on high |
 | Performance Agent | Diff, benchmarks, budgets | Regression report | Blocks on budget breach |
 | Refiner | Failure bundle | Minimal corrective patch | None |
-| Integrator | Approved patches | Merge, conflict resolution | Blocks on conflict |
+| **Commission (10 seats)** | Sealed case dossier | Unanimous verdict, dissents, precedent | **Absolute — any one seat voids all** |
+| Integrator | Commission-accepted patches | Merge, conflict resolution | Blocks on conflict |
 | Documentation Agent | Merged diff, ADRs | Docs, changelog | None |
 | Release Agent | Merged main | Deploy, canary, rollback | **Hard block** on canary regression |
 | Memory Curator | All artifacts | Repo map, retrieval, summaries | None |
 | Supervisor | Metrics, escalations | Lessons, routing tuning, alerts | Can trip circuit breakers |
 
-See [`docs/02-agent-specs.md`](docs/02-agent-specs.md) for the full specification of each.
+See [`docs/02-agent-specs.md`](docs/02-agent-specs.md) for the full specification of each,
+and [`docs/07-commission.md`](docs/07-commission.md) for the ten Commission seats.
+
+## The Commission in brief
+
+| | |
+|---|---|
+| **Composition** | 10 seats, disjoint jurisdictions, read-only, blind parallel voting |
+| **Decision rule** | Unanimity. One admissible dissent voids the entire adjudication — no partial acceptance |
+| **Dissent validity** | Must state jurisdiction, cite evidence, name a concrete failure, and give an objectively checkable clearance condition |
+| **Clearance** | Only the issuing seat — or its successor — may clear its own dissent |
+| **Tenure** | 3 passings, then mandatory succession (hard backstop at 12 adjudications) |
+| **Succession** | Precedent Pack → Bench Exam on 12 sealed cases → successor seated, predecessor retired |
+| **Improvement** | Rejected patterns feed back into implementer prompts; per-seat precision tracked across generations |
+| **Bounded by** | 3 adjudication rounds, contradiction detection, human arbitration |

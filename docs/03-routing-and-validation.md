@@ -44,6 +44,7 @@ flowchart TB
 | `fix` | attempt ≥ 2 | Refiner | T3 |
 | `review` | risk `low`/`medium` | Reviewer | T2 |
 | `review` | touches auth/payments/PII/crypto | Reviewer + Security | T3 + human |
+| `adjudicate` | any reaching Gate C | Commission (seated bench, parallel) | T2/T3 by seat |
 | `integrate` | any | Integrator | T2 |
 | `document` | any | Docs | T1 |
 
@@ -106,11 +107,14 @@ flowchart LR
     end
 
     G2 -- fail --> RC
-    G2 -- pass --> OK["APPROVED → merge queue"]
+    G2 -- pass --> GC["GATE C — The Commission<br/>10 seats · blind parallel vote<br/>unanimity required (§7)"]
+    GC -- "≥ 1 admissible dissent<br/>whole dossier void" --> RC
+    GC -- "10 × PASS" --> OK["APPROVED → merge queue"]
 
     style G0 fill:#1f6f43,color:#fff
     style G1 fill:#8a6d1f,color:#fff
     style G2 fill:#7a3b8f,color:#fff
+    style GC fill:#4a1d5c,color:#fff
     style OK fill:#1f6f43,color:#fff
     style RC fill:#a33,color:#fff
 ```
@@ -135,7 +139,12 @@ flowchart LR
 | Security agent | on security-path diffs | ✅ | ✅ + human |
 | Performance agent | on hot-path diffs | ✅ | ✅ + benchmarks |
 | Human approval | ❌ | on escalation | ✅ mandatory |
+| Commission bench | reduced (C1,C2,C3,C8,C10) | full 10 | full 10 |
 | Canary window | 15 min | 1 hour | 24 hours + staged flags |
+
+Bench composition governs which seats are *seated* for a risk class. It never softens the
+decision rule: a dissent from any seated commissioner voids the entire adjudication. Full
+bench is the default until per-seat precision has been measured and is stable (§7.12).
 
 ## 3.3 The feedback loop: root-cause routing
 
@@ -188,6 +197,9 @@ The classifier is rules-first, LLM-assisted. Strong deterministic signals:
 | Acceptance criteria contradict each other | Spec defect |
 | Two work orders' tests pass alone but fail together | Integration/semantic conflict |
 | Reviewer blocker cites a criterion the WO never covered | Decomposition defect (coverage gap) |
+| C1 or C10 dissent (requirements unmet, evidence missing) | Spec or decomposition defect — never routed to the coder |
+| C3 dissent (workaround, not a fix) | Code defect, routed to the Refiner with the dissent as an added acceptance criterion |
+| C4 dissent (wrong skills or method) | Method defect — re-run with corrected tooling; recurring instances are a lesson, not a patch |
 
 ### The no-progress detector
 
@@ -211,6 +223,7 @@ the one that works.
 | Scope | Limit | On exhaustion |
 |---|---|---|
 | Attempts per work order at one gate | 3 | Escalation ladder |
+| Commission adjudication rounds | 3 | Human arbitration with full dissent ledger |
 | Total attempts per work order | 6 | Human escalation |
 | Re-plans per subtree | 2 | Human escalation |
 | Spec revisions per epic | 3 | Human product review |

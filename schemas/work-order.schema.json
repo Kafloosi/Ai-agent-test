@@ -71,7 +71,7 @@
       }
     },
     "state": {
-      "enum": ["DRAFT", "SPECIFIED", "PLANNED", "QUEUED", "ASSIGNED", "IN_PROGRESS", "SUBMITTED", "VERIFYING", "REVISION", "REPLAN", "APPROVED", "INTEGRATING", "MERGED", "RELEASED", "ROLLED_BACK", "FAILED_RUN", "BLOCKED", "ESCALATED", "ABANDONED"]
+      "enum": ["DRAFT", "SPECIFIED", "PLANNED", "QUEUED", "ASSIGNED", "IN_PROGRESS", "SUBMITTED", "VERIFYING", "ADJUDICATING", "REVISION", "REPLAN", "APPROVED", "INTEGRATING", "MERGED", "RELEASED", "ROLLED_BACK", "FAILED_RUN", "BLOCKED", "ESCALATED", "ABANDONED"]
     },
     "attempts": { "type": "integer", "minimum": 0 },
     "escalation_rung": { "type": "integer", "minimum": 0, "maximum": 6 },
