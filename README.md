@@ -25,7 +25,13 @@ Four principles drive every decision in this design:
    [four-layer store](docs/09-memory-and-learning.md) — working, episodic, semantic,
    procedural — with a work journal that survives compaction and lease expiry, and a gated
    promotion path from "this happened once" to "the fleet knows this".
-6. **Final acceptance is unanimous, and its judges are term-limited.** A ten-seat
+6. **Agents emit artifacts, not narration — and a rejected instance is replaced, not
+   coached.** No preamble, no commentary, no explaining what the diff already shows; free
+   text survives only where another stage consumes it. When work is rejected the instance is
+   terminated and a fresh one of the same role is seated with a ≤2,000-token
+   [carry-forward pack](docs/10-token-efficiency.md), because the rejected run's context is
+   the longest, most polluted, and most anchored context in the system.
+7. **Final acceptance is unanimous, and its judges are term-limited.** A ten-seat
    [Commission](docs/07-commission.md) holds absolute authority at the last gate: one
    dissent voids everything until the objection is fixed. Each seat serves three passings,
    then hands a validated Precedent Pack to a successor — so the standard compounds across
@@ -44,6 +50,7 @@ Four principles drive every decision in this design:
 | [`docs/07-commission.md`](docs/07-commission.md) | The Commission: ten-seat unanimous adjudication, dissent lifecycle, tenure and succession |
 | [`docs/08-agent-skills-and-tools.md`](docs/08-agent-skills-and-tools.md) | Skills, tools and connectors per agent; the Design Agent; permission matrix |
 | [`docs/09-memory-and-learning.md`](docs/09-memory-and-learning.md) | Four-layer memory, compaction, work journals, the learning loop, memory integrity |
+| [`docs/10-token-efficiency.md`](docs/10-token-efficiency.md) | Output discipline, per-role budgets, reasoning depth, instance replacement |
 | [`schemas/`](schemas/) | JSON Schemas for the message contracts between agents |
 
 ## Master flowchart
@@ -109,7 +116,7 @@ flowchart TB
 
     subgraph LOOP["⑥ Refinement Loop"]
         RC{"Root-cause<br/>classifier"}
-        RC -- "code defect" --> REF["Refiner / Repair Agent"]
+        RC -- "code defect" --> REF["Terminate instance →<br/>Refiner / fresh instance<br/>+ carry-forward pack"]
         REF --> BUDGET{"attempts &lt; N<br/>and budget left<br/>and progress made?"}
         BUDGET -- yes --> PATCH
         BUDGET -- no --> ESC["Escalation ladder"]
@@ -223,4 +230,6 @@ and [`docs/07-commission.md`](docs/07-commission.md) for the ten Commission seat
 | **Tenure** | 3 passings, then mandatory succession (hard backstop at 12 adjudications) |
 | **Succession** | Precedent Pack → Bench Exam on 12 sealed cases → successor seated, predecessor retired |
 | **Improvement** | Rejected patterns feed back into implementer prompts; per-seat precision tracked across generations |
+| **On rejection** | The producing instance is terminated and replaced with a fresh one of the same role carrying a ≤2,000-token carry-forward pack — never coached |
+| **Vote cost** | PASS carries no rationale (≤50 tokens); rationale is mandatory only on dissent |
 | **Bounded by** | 3 adjudication rounds, contradiction detection, human arbitration |

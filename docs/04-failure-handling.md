@@ -135,10 +135,10 @@ changes *something structural* — never simply "try again".
 
 ```mermaid
 flowchart LR
-    R0["Rung 0<br/>Retry, same agent<br/>+ failure bundle"] --> R1
-    R1["Rung 1<br/>Same agent, richer context<br/>+ broader retrieval"] --> R2
-    R2["Rung 2<br/>Stronger model tier<br/>T2 → T3"] --> R3
-    R3["Rung 3<br/>Different role:<br/>Refiner / specialist"] --> R4
+    R0["Rung 0<br/>Replace instance, same tier<br/>+ carry-forward pack"] --> R1
+    R1["Rung 1<br/>Replace + broader retrieval<br/>(pack showed a context gap)"] --> R2
+    R2["Rung 2<br/>Replace + stronger tier<br/>T2 → T3"] --> R3
+    R3["Rung 3<br/>Replace with a different role:<br/>Refiner / specialist"] --> R4
     R4["Rung 4<br/>Re-plan: split the WO<br/>or revise the contract"] --> R5
     R5["Rung 5<br/>Human intervention<br/>with full evidence pack"] --> R6
     R6["Rung 6<br/>Cancel / defer<br/>human decision"]
@@ -149,6 +149,12 @@ flowchart LR
 
 Rules:
 
+0. **Every rung below 4 replaces the instance rather than coaching it.** The rejected run's
+   context is the longest and most polluted in the system and is anchored on the approach
+   that just failed; the successor inherits a ≤ 2,000-token carry-forward pack instead
+   (§10.4). Budgets are inherited, not reset, and replacement applies only to code and
+   method defects — spec, design, and decomposition defects route upstream, where a fresh
+   instance would face the same bad input and fail identically.
 1. **A rung may not repeat.** Repeating a rung is the definition of a loop.
 2. **Skip rungs on strong signal.** Identical failures across two different agents skip
    straight to Rung 4 — the problem is upstream, not in the code.

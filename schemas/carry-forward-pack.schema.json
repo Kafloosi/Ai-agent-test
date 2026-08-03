@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/carry-forward-pack.schema.json",
+  "title": "CarryForwardPack",
+  "description": "What a terminated instance hands to its replacement. 'Same knowledge' means distilled knowledge, never the transcript — replaying the transcript would preserve the anchoring that caused the rejection and save nothing. Built by the deterministic Clerk, never by the terminated instance, which cannot be trusted to summarise its own failure. Hard cap: 2,000 tokens.",
+  "type": "object",
+  "required": ["work_order_id", "generation", "goal", "next_step"],
+  "additionalProperties": false,
+  "properties": {
+    "work_order_id": { "type": "string" },
+    "generation": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Which instance of this role is being seated. Equals the attempt counter; capped by max_attempts."
+    },
+    "terminated_instance": { "type": "string" },
+    "termination_reason": {
+      "enum": ["commission_rejected", "gate_failure", "no_progress_detected", "lease_expired"],
+      "description": "Replacement is only correct for code_defect and method_and_skills root causes. Spec, design, and decomposition defects route upstream — a fresh instance faces the same ambiguous input and fails identically."
+    },
+    "goal": {
+      "type": "string",
+      "description": "Copied verbatim from the work order. Paraphrase is where drift starts."
+    },
+    "acceptance_criteria_status": {
+      "type": "array",
+      "description": "What already passes must not regress.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "state": { "enum": ["passing", "failing", "untested"] }
+        }
+      }
+    },
+    "open_dissents": {
+      "type": "array",
+      "description": "The successor's actual acceptance bar. Each clearance condition functions as an added acceptance criterion.",
+      "items": {
+        "type": "object",
+        "required": ["seat", "remediation_condition"],
+        "properties": {
+          "seat": { "type": "string" },
+          "jurisdiction": { "type": "string" },
+          "failure_statement": { "type": "string", "maxLength": 300 },
+          "remediation_condition": { "type": "string", "maxLength": 300 },
+          "evidence_ref": { "type": "string" }
+        }
+      }
+    },
+    "falsified_hypotheses": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 200 },
+      "description": "Forbidden to re-test. The largest single source of wasted retry spend, and the main reason this pack exists."
+    },
+    "decisions_and_constraints": {
+      "type": "array",
+      "items": { "type": "string", "maxLength": 200 },
+      "description": "Settled choices and discovered constraints, so the successor does not re-derive them."
+    },
+    "files_touched": { "type": "array", "items": { "type": "string" } },
+    "current_diff": {
+      "type": ["string", "null"],
+      "description": "The work product is kept; only the reasoning around it is discarded. Null when the rejection warrants starting the diff over."
+    },
+    "next_step": {
+      "type": "string",
+      "maxLength": 300,
+      "description": "One line the successor can start from without reconstructing anything."
+    },
+    "budget_remaining": {
+      "type": "object",
+      "description": "Inherited, not reset. Unbounded respawn is the same non-converging loop as unbounded retry.",
+      "properties": {
+        "tokens": { "type": "integer" },
+        "usd": { "type": "number" },
+        "attempts": { "type": "integer" }
+      }
+    },
+    "escalation_rung": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 6,
+      "description": "Determines what changes for this generation: 0 same tier, 1 broader retrieval, 2 stronger tier, 3 different role. A rung is never repeated."
+    },
+    "token_count": {
+      "type": "integer",
+      "maximum": 2000,
+      "description": "Enforced ceiling. A pack that cannot fit has an oversized work order behind it — a decomposition defect, not a summarisation problem."
+    }
+  }
+}

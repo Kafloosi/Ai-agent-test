@@ -16,7 +16,11 @@
     "files_touched": { "type": "array", "items": { "type": "string" } },
     "self_tests_added": { "type": "array", "items": { "type": "string" } },
     "root_cause": { "type": "string", "description": "Refiner only: the hypothesis this patch tests. Required before any corrective edit." },
-    "notes": { "type": "string", "description": "Free text. No other agent may parse this field." },
+    "notes": {
+      "type": "string",
+      "maxLength": 400,
+      "description": "Omit unless an assumption or contract deviation needs stating. Never a summary of the diff, never an explanation of choices the diff already shows — that is narration, and no stage consumes it."
+    },
     "confidence": {
       "type": "number",
       "minimum": 0,

@@ -40,6 +40,11 @@ flowchart TB
     style CACHE fill:#1f6f43,color:#fff
 ```
 
+Fleet-wide output discipline, per-role token budgets, reasoning-depth assignment, and the
+instance-replacement protocol are specified in
+[`10-token-efficiency.md`](10-token-efficiency.md). This section covers the architectural
+levers; that one covers the settings.
+
 ### The levers, in order of impact
 
 1. **Prompt caching on a stable prefix.** Context packs are ordered stable-to-volatile

@@ -170,7 +170,7 @@ flowchart TB
     C2 --> GUARD
     C7 --> GUARD
     GUARD{"Loop guard"}
-    GUARD -->|"attempts < max<br/>AND budget left<br/>AND progress detected"| RETRY["Re-enter IN_PROGRESS"]
+    GUARD -->|"attempts < max<br/>AND budget left<br/>AND progress detected"| RETRY["Terminate instance →<br/>seat successor with<br/>carry-forward pack"]
     GUARD -->|"any condition fails"| ESCALATE["Escalation ladder →"]
 
     C3 --> REPLAN["Subtree re-planned;<br/>downstream WOs invalidated"]
@@ -223,6 +223,7 @@ the one that works.
 | Scope | Limit | On exhaustion |
 |---|---|---|
 | Attempts per work order at one gate | 3 | Escalation ladder |
+| Instance replacements per work order | = attempts (hard cap 6) | Human escalation; budget is inherited, never reset (§10.4) |
 | Commission adjudication rounds | 3 | Human arbitration with full dissent ledger |
 | Total attempts per work order | 6 | Human escalation |
 | Re-plans per subtree | 2 | Human escalation |

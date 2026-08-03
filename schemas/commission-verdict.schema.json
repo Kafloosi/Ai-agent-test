@@ -31,7 +31,11 @@
           "instance_id": { "type": "string" },
           "vote": { "enum": ["PASS", "DISSENT", "RECUSED"] },
           "recusal_reason": { "type": "string", "description": "A seat in SUCCESSION may not vote." },
-          "rationale": { "type": "string" },
+          "rationale": {
+            "type": "string",
+            "maxLength": 1200,
+            "description": "Populated ONLY on DISSENT. A PASS vote carries no rationale — a seat that agrees has nothing a downstream stage consumes, and rationale on ten seats across three rounds is the design's largest source of unread prose."
+          },
           "dissent_ids": { "type": "array", "items": { "type": "string" } },
           "model_tier": { "enum": ["T2", "T3"] },
           "voted_blind": {

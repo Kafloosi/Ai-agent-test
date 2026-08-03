@@ -181,6 +181,20 @@ work order, its remediation condition, and its current status. Commissioners see
 on re-adjudication — so a fix that resolves one dissent by violating another is caught
 immediately.
 
+**Rejection terminates the producing instance.** A rejected verdict does not send work back
+to the agent that produced it; that instance is retired and a fresh one of the same role,
+with the same skills, is seated carrying a distilled carry-forward pack (§10.4). The
+Commission's own succession model already works this way — the knowledge is the asset, the
+instance is disposable. Replacement is bounded by the same attempt ceiling and inherits the
+remaining budget, and it applies only where a fresh attempt could plausibly succeed: a C1
+(requirements) or C10 (evidence) dissent routes upstream instead, because a new implementer
+faces the same ambiguous spec and fails the same way.
+
+**A PASS vote carries no rationale.** A seat that agrees has nothing a downstream stage
+consumes, and its agreement is fully expressed by the vote. Rationale is mandatory only on
+dissent, where someone has to act on it. Across ten seats and up to three rounds this is the
+single largest token saving in the design (§10.7).
+
 ## 7.6 Dissent lifecycle
 
 ```mermaid

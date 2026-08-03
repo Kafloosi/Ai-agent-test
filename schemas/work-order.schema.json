@@ -74,6 +74,11 @@
       "enum": ["DRAFT", "SPECIFIED", "PLANNED", "QUEUED", "ASSIGNED", "IN_PROGRESS", "SUBMITTED", "VERIFYING", "ADJUDICATING", "REVISION", "REPLAN", "APPROVED", "INTEGRATING", "MERGED", "RELEASED", "ROLLED_BACK", "FAILED_RUN", "BLOCKED", "ESCALATED", "ABANDONED"]
     },
     "attempts": { "type": "integer", "minimum": 0 },
+    "instance_generation": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Which instance of the assigned role is currently working this. Increments on every replacement; bounded by budget.max_attempts. A rejected instance is terminated and replaced rather than coached — see docs/10 §10.4."
+    },
     "escalation_rung": { "type": "integer", "minimum": 0, "maximum": 6 },
     "assigned_pool": { "type": "string" },
     "model_tier": { "enum": ["T1", "T2", "T3"] },

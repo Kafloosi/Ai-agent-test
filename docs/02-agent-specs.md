@@ -13,6 +13,19 @@ contract and agents must not depend on it.
 - **Guardrails** — what it may not do, enforced outside the prompt where possible.
 - **Exit criteria** — when its output is accepted, and what makes it fail.
 
+## 2.0 Output discipline — applies to every agent
+
+Every agent emits **only its artifact**. No preamble, no commentary between tool calls, no
+summary afterwards, no restating the task, no explaining choices the artifact already shows.
+Outputs are schema-constrained and capped; free text appears only where another stage
+consumes it — `root_cause`, `failure_scenario`, `remediation_condition`,
+`contract_deviations`, `falsified_hypotheses`. Those are evidence, not narration, and they
+stay: a dissent without a clearance condition never converges, and a failure bundle without
+falsified hypotheses causes the next attempt to re-test what the last one disproved.
+
+Per-role caps, reasoning depth, and the enforcement rules are in
+[`10-token-efficiency.md`](10-token-efficiency.md).
+
 Each agent's **skills** — packaged procedural knowledge loaded by progressive disclosure —
 and its exact tool and connector surface are specified separately in
 [`08-agent-skills-and-tools.md`](08-agent-skills-and-tools.md), and what it remembers between
