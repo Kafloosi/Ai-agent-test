@@ -202,6 +202,7 @@ one.
 | Ordinary — 80% Commission vote | Constitutional — human ratification |
 |---|---|
 | Prompt and skill content | Separation of duties (who may write acceptance tests) |
+| New skills, including externally sourced ones (§12) | Egress allowlist and source-tier rules |
 | Routing rules, tier assignment | Gate 0's authority as ground truth |
 | Budgets, thresholds, caps | The unanimity rule at Gate C |
 | New gate checks, new skills | Human approval checkpoints (§2.18) |

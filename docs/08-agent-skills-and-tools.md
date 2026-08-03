@@ -180,6 +180,10 @@ Rules that decide whether a skill actually works:
 6. **Skills are earned, not assumed.** The Supervisor drafts new skills from repeated
    escalations and Commission `rejected_patterns` (§7.9). That is the pipeline from "the
    fleet keeps making this mistake" to "the fleet knows how not to".
+7. **Agents may acquire skills they lack**, including from external sources, without waiting
+   for a human — under the acquisition order, source tiers, execution-verification
+   requirement, and promotion vote in
+   [`12-skill-acquisition.md`](12-skill-acquisition.md).
 
 ## 8.6 Permission matrix
 

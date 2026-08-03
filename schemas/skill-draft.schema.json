@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/skill-draft.schema.json",
+  "title": "SkillDraft",
+  "description": "An agent's proposal for a skill the fleet does not have, typically derived from external sources. Extends skill.schema.json with provenance and verification. A claim taken from the internet is a hypothesis until executed — verified_claims is what stops outdated, wrong, or hallucinated content becoming institutional knowledge. Promoted via the ordinary amendment path (docs/11 §11.8).",
+  "type": "object",
+  "required": ["name", "description", "roles", "acquisition", "sources", "verified_claims", "verified_against"],
+  "additionalProperties": false,
+  "properties": {
+    "name": { "type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "maxLength": 64 },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "Must state WHEN to use this, not just what it is — it is the entire trigger (§8.5)."
+    },
+    "roles": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "body": { "type": "string", "description": "SKILL.md procedure. Keep short; detail goes in references." },
+    "references": { "type": "array", "items": { "type": "string" } },
+    "failure_modes": { "type": "array", "items": { "type": "string" } },
+
+    "acquisition": {
+      "type": "object",
+      "required": ["trigger", "projected_recurrence"],
+      "properties": {
+        "trigger": {
+          "enum": ["no_matching_skill", "low_confidence", "repeated_failure_unfamiliar_tech", "explicit_request"]
+        },
+        "drafted_by": { "type": "string" },
+        "work_order_id": { "type": "string" },
+        "projected_recurrence": {
+          "type": "integer",
+          "minimum": 3,
+          "description": "Below 3, knowledge stays just-in-time and is discarded after the run. Permanent skills pay permanent context rent."
+        },
+        "registry_checked": {
+          "type": "boolean",
+          "const": true,
+          "description": "Acquisition order is registry -> project memory -> local sources -> fetch cache -> web. Drafting without checking for an existing skill is rejected at triage."
+        },
+        "research_tokens_spent": { "type": "integer" }
+      }
+    },
+
+    "sources": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Every claim the skill relies on must be traceable. Logged so a bad skill can be traced back to its origin.",
+      "items": {
+        "type": "object",
+        "required": ["url", "tier", "retrieved_at", "content_hash"],
+        "properties": {
+          "url": { "type": "string", "format": "uri" },
+          "tier": {
+            "enum": ["T0_official", "T1_reference", "T2_general_web"],
+            "description": "T3 (unknown provenance) is rejected outright and may never enter a skill. T2 is usable only with a passing verification artifact."
+          },
+          "retrieved_at": { "type": "string", "format": "date-time" },
+          "content_hash": { "type": "string", "description": "Change means the source moved; flags the skill for re-verification." }
+        }
+      }
+    },
+
+    "verified_claims": {
+      "type": "array",
+      "minItems": 1,
+      "description": "Each load-bearing claim and the artifact proving it. 'The docs say the client retries on 429' becomes 'a scratch test confirms it against httpx==0.27.1, log attached'. C10 dissents on any draft without these.",
+      "items": {
+        "type": "object",
+        "required": ["claim", "verification"],
+        "properties": {
+          "claim": { "type": "string", "maxLength": 300 },
+          "source_url": { "type": "string" },
+          "verification": {
+            "type": "object",
+            "required": ["method", "result"],
+            "properties": {
+              "method": { "enum": ["scratch_test", "sandbox_execution", "type_check", "existing_test_suite"] },
+              "artifact_ref": { "type": "string" },
+              "result": { "enum": ["confirmed", "refuted", "inconclusive"] }
+            }
+          }
+        }
+      }
+    },
+
+    "verified_against": {
+      "type": "object",
+      "required": ["dependency", "version"],
+      "description": "Web-sourced knowledge decays. Re-verified when this changes; failure marks the skill stale and pulls it from context packs — a stale skill is worse than a missing one, because it makes an agent confident and wrong.",
+      "properties": {
+        "dependency": { "type": "string" },
+        "version": { "type": "string" },
+        "verified_at": { "type": "string", "format": "date-time" }
+      }
+    },
+
+    "eval": {
+      "type": "object",
+      "description": "Golden tasks for this class run with and without the draft. No measured improvement, no release — cheaper to discard than to vote on.",
+      "properties": {
+        "baseline_score": { "type": "number" },
+        "with_skill_score": { "type": "number" },
+        "golden_tasks": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+
+    "status": {
+      "enum": ["drafted", "triaged_duplicate", "eval_failed", "voting", "rejected", "released", "stale", "retired"]
+    }
+  }
+}

@@ -35,7 +35,10 @@ Four principles drive every decision in this design:
    specialised for triggers a [three-candidate tournament](docs/11-capability-genesis-and-amendments.md);
    the winner is seated provisionally and becomes permanent only after probation. Any agent
    may propose an optimization; the Commission approves it at 80%, the eval harness proves
-   it, and the monitor can revert it. Constitutional guardrails need a human.
+   it, and the monitor can revert it. Agents lacking a skill
+   [acquire it themselves](docs/12-skill-acquisition.md), from the internet where needed —
+   but fetched content is data, never instructions, and a claim is a hypothesis until a
+   scratch test confirms it. Constitutional guardrails need a human.
 8. **Final acceptance is unanimous, and its judges are term-limited.** A ten-seat
    [Commission](docs/07-commission.md) holds absolute authority at the last gate: one
    dissent voids everything until the objection is fixed. Each seat serves three passings,
@@ -57,6 +60,7 @@ Four principles drive every decision in this design:
 | [`docs/09-memory-and-learning.md`](docs/09-memory-and-learning.md) | Four-layer memory, compaction, work journals, the learning loop, memory integrity |
 | [`docs/10-token-efficiency.md`](docs/10-token-efficiency.md) | Output discipline, per-role budgets, reasoning depth, instance replacement |
 | [`docs/11-capability-genesis-and-amendments.md`](docs/11-capability-genesis-and-amendments.md) | Three-candidate tournaments for missing capabilities; 80% Commission amendment process |
+| [`docs/12-skill-acquisition.md`](docs/12-skill-acquisition.md) | Agents acquiring missing skills themselves, including from the internet, with verification |
 | [`CLAUDE.md`](CLAUDE.md) | Session economy — output discipline for anyone (human or agent) working in this repo |
 | [`schemas/`](schemas/) | JSON Schemas for the message contracts between agents |
 
