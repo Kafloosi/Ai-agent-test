@@ -13,6 +13,12 @@ contract and agents must not depend on it.
 - **Guardrails** — what it may not do, enforced outside the prompt where possible.
 - **Exit criteria** — when its output is accepted, and what makes it fail.
 
+Each agent's **skills** — packaged procedural knowledge loaded by progressive disclosure —
+and its exact tool and connector surface are specified separately in
+[`08-agent-skills-and-tools.md`](08-agent-skills-and-tools.md), and what it remembers between
+runs in [`09-memory-and-learning.md`](09-memory-and-learning.md). Both are part of every
+agent's contract; they live apart because they version on their own cadence.
+
 Model tiers are logical: **T1** = fast/cheap for mechanical work, **T2** = balanced
 default, **T3** = strongest for design, ambiguity, and hard debugging.
 
@@ -73,6 +79,28 @@ parallel agents produce work that only fails to compose at integration time — 
 expensive place to discover it.
 
 ---
+
+## 2.3.1 Design Agent (UX & Interface)
+
+A **peer of the Architect**, not a subordinate: the Architect owns system structure, the
+Design Agent owns interface and experience, and both run in parallel against the same spec.
+Full specification, including its skill set, in
+[`08-agent-skills-and-tools.md` §8.3](08-agent-skills-and-tools.md#83-design-agent-ux--interface).
+
+| Field | Specification |
+|---|---|
+| **Role** | Turn the spec into interaction and interface decisions implementers can build against without inventing UX. |
+| **Inputs** | ProductSpec + acceptance criteria, design system and tokens, component inventory, existing screens, accessibility standard |
+| **Outputs** | `DesignDecision`: user flows, **state inventory** (empty / loading / partial / error / success / offline), component selection, interaction and validation behaviour, user-facing copy, accessibility annotations, responsive behaviour |
+| **Design logic** | Enumerate every state a screen can be in *before* styling any of them — unhandled empty and error states are the usual gap between "the feature works" and "the feature is usable". Reuse existing components before proposing new ones. On open-ended briefs, propose 3–4 distinct directions and let a human choose rather than silently committing to one house style. |
+| **Model tier** | T3 |
+| **Tools** | Design-token store, component inventory, browser automation, contrast and accessibility checkers, screenshot diffing |
+| **Guardrails** | May not write production code; no new component without a design-system entry; every interactive element carries accessibility annotations; user-facing copy is part of the deliverable, not left to the implementer |
+| **Exit criteria** | Every acceptance criterion has a defined interface state; all states enumerated; accessibility annotations complete |
+
+Its outputs are contracts in the same sense as §2.3's: frozen before parallel implementation
+starts, so the Frontend Implementer builds against a decision instead of guessing and the
+Test Engineer can assert against defined states.
 
 ## 2.4 Task Decomposer (Planner)
 
@@ -257,7 +285,7 @@ generate plausible-sounding, unfalsifiable objections and stall the loop.
 | **Role** | Serve every agent the smallest sufficient context. |
 | **Inputs** | Repo state, ADRs, specs, past work orders, failure history, lesson store |
 | **Outputs** | Context packs, repo map, symbol/embedding indexes, epic summaries |
-| **Design logic** | Hybrid retrieval (BM25 + embeddings + symbol graph expansion) then rerank, packed in cache-friendly order (§1.5). Maintains a rolling repo map regenerated on merge. Compacts long epic histories into decision summaries so context does not grow linearly with project age. Enforces a hard per-agent token budget — truncation is deliberate and reported, never silent. |
+| **Design logic** | Hybrid retrieval (BM25 + embeddings + symbol graph expansion) then rerank, packed in cache-friendly order (§1.5). Maintains a rolling repo map regenerated on merge. Compacts long epic histories into decision summaries so context does not grow linearly with project age. Runs memory hygiene — TTL, decay, deduplication, contradiction detection, invalidation on contract change (§9.7). Enforces a hard per-agent token budget — truncation is deliberate and reported, never silent. |
 | **Model tier** | T1 for summarisation; retrieval is code |
 | **Tools** | Vector store, symbol index, git |
 | **Guardrails** | Never exceeds the agent's context budget; never serves stale contracts (invalidates on merge); reports what it dropped |

@@ -1,0 +1,79 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/memory-record.schema.json",
+  "title": "MemoryRecord",
+  "description": "One durable fact in the project memory store. Provenance is not bookkeeping — it is what makes a contradictory memory resolvable and a bad memory revocable. A run may propose a record; only a verified outcome promotes it, which is what stops the store filling with the confident assertions of runs that turned out to be wrong.",
+  "type": "object",
+  "required": ["id", "category", "content", "provenance"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "category": {
+      "enum": ["structural", "contractual", "decisional", "domain", "operational", "preference"],
+      "description": "Drives TTL, invalidation triggers, and who is permitted to write it."
+    },
+    "content": { "type": "string", "maxLength": 4000 },
+    "scope": {
+      "type": "object",
+      "description": "What this record is about. Used to invalidate on change and to scope retrieval.",
+      "properties": {
+        "repo": { "type": "string" },
+        "modules": { "type": "array", "items": { "type": "string" } },
+        "contracts": { "type": "array", "items": { "type": "string" } },
+        "tenant_id": { "type": "string", "description": "Memory is never shared across tenants." }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["written_by", "verified"],
+      "additionalProperties": false,
+      "properties": {
+        "written_by": { "type": "string", "description": "Agent role or 'human'." },
+        "work_order_id": { "type": "string" },
+        "evidence": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Verdict ids, file:line, test names. A record with no evidence may be stored but stays unverified."
+        },
+        "verified": {
+          "type": "boolean",
+          "description": "True only when a passing gate outcome backs it. Unverified records are retrievable but labelled inline so the agent weighs them as hypotheses, not facts."
+        },
+        "source_trust": {
+          "enum": ["internal", "untrusted_external"],
+          "default": "internal",
+          "description": "Content originating from issue text, web pages, PR comments, or third-party tool output is untrusted and must never be promoted to a verified fact on its own."
+        }
+      }
+    },
+    "confidence": { "type": "number", "minimum": 0, "maximum": 1 },
+    "ttl_days": {
+      "type": ["integer", "null"],
+      "description": "Null for semantic and procedural records. Operational ≈ 90, episodic detail ≈ 180."
+    },
+    "supersedes": {
+      "type": ["string", "null"],
+      "description": "Set when this record resolves a contradiction. Contradictions are flagged and resolved by provenance strength and recency — never silently overwritten."
+    },
+    "invalidated_by": {
+      "type": ["string", "null"],
+      "description": "Merge, contract change, superseding ADR, or verified fix that made this record false. Invalidated records leave the retrieval index immediately — a stale contract is worse than no contract."
+    },
+    "hit_count": { "type": "integer", "minimum": 0 },
+    "last_used_at": { "type": "string", "format": "date-time" },
+    "created_at": { "type": "string", "format": "date-time" },
+    "versions": {
+      "type": "array",
+      "description": "Append-only mutation history so a bad or leaked entry can be redacted and its blast radius traced.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "version_id": { "type": "string" },
+          "operation": { "enum": ["created", "modified", "invalidated", "redacted"] },
+          "actor": { "type": "string" },
+          "at": { "type": "string", "format": "date-time" }
+        }
+      }
+    }
+  }
+}

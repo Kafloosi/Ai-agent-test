@@ -1,0 +1,65 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/work-journal.schema.json",
+  "title": "WorkJournal",
+  "description": "Per-run durable record of intent and progress. On lease expiry, crash, retry, or escalation the journal is replayed — never the transcript. This is what makes stateless workers viable: the worker is disposable because the journal is not. Written outside the context window before compaction, not recovered from a summary afterwards.",
+  "type": "object",
+  "required": ["work_order_id", "attempt", "agent_role", "goal", "state", "next_step"],
+  "additionalProperties": false,
+  "properties": {
+    "work_order_id": { "type": "string" },
+    "attempt": { "type": "integer", "minimum": 1 },
+    "agent_role": { "type": "string" },
+    "run_id": { "type": "string" },
+    "goal": {
+      "type": "string",
+      "description": "Copied verbatim from the work order. Never paraphrased — paraphrase is where drift starts."
+    },
+    "state": { "enum": ["in_progress", "blocked", "submitted", "abandoned"] },
+    "done": { "type": "array", "items": { "type": "string" } },
+    "in_progress": { "type": "string" },
+    "blocked_on": {
+      "type": ["string", "null"],
+      "description": "What is needed to proceed, and from whom. Null when not blocked."
+    },
+    "hypotheses": {
+      "type": "array",
+      "description": "The field that earns the journal its place: it stops attempt N+1 re-testing what attempt N disproved. Feeds falsified_hypotheses in the failure bundle.",
+      "items": {
+        "type": "object",
+        "required": ["claim", "status"],
+        "additionalProperties": false,
+        "properties": {
+          "claim": { "type": "string" },
+          "status": { "enum": ["untested", "testing", "confirmed", "falsified"] },
+          "evidence": { "type": "string", "description": "What established the status — a test name, a log line, a file:line." }
+        }
+      }
+    },
+    "decisions_made": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Choices a successor would otherwise have to re-make, with the reason."
+    },
+    "files_touched": { "type": "array", "items": { "type": "string" } },
+    "next_step": {
+      "type": "string",
+      "description": "The single next action. A successor must be able to start from this line alone."
+    },
+    "notes_for_successor": { "type": "string" },
+    "open_questions": { "type": "array", "items": { "type": "string" } },
+    "compactions": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "How many times this run's context was compacted. Rising counts with falling progress indicate the work order is oversized (decomposition defect)."
+    },
+    "budget_spent": {
+      "type": "object",
+      "properties": {
+        "tokens": { "type": "integer" },
+        "wall_clock_s": { "type": "integer" }
+      }
+    },
+    "updated_at": { "type": "string", "format": "date-time" }
+  }
+}

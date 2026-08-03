@@ -21,6 +21,9 @@ long as the property in the right-hand column survives.
 | Feature flags | LaunchDarkly / OpenFeature | Runtime kill switch independent of deploy |
 | Observability | OpenTelemetry → Grafana/Datadog | Trace spanning the full work-order lifecycle |
 | Prompt registry | Git + versioned releases | Prompts are versioned artifacts with rollback |
+| Skill registry | Git (`skills/<name>/SKILL.md` + assets), versioned | Progressive disclosure: description resident, body on activation, references on demand |
+| Memory store | Postgres + object storage, append-only versions | Provenance on every record; write-gated; revocable and redactable |
+| Connectors | MCP servers, per-work-order scoped credentials | One integration per external system, reusable across agents |
 
 **Model pinning is not optional.** A silently changing model version turns every quality
 metric into noise and makes regressions undebuggable. Pin exact versions per tier and
@@ -39,7 +42,7 @@ flowchart LR
     P3["Phase 3 — Planning layer<br/>+ Analyst, Architect, Decomposer<br/>(parallel DAG execution begins)"] --> P4
     P4["Phase 4 — Loops<br/>+ Refiner, root-cause classifier,<br/>escalation ladder, budgets"] --> P5
     P5["Phase 5 — Delivery<br/>+ Integrator, merge queue,<br/>Release agent, flags, canary"] --> P6
-    P6["Phase 6 — Scale &amp; learn<br/>+ Supervisor, lesson store,<br/>eval harness, model cascade"] --> P7
+    P6["Phase 6 — Scale &amp; learn<br/>+ Supervisor, skill &amp; lesson registry,<br/>promotion loop, eval harness, model cascade"] --> P7
     P7["Phase 7 — Commission<br/>+ 10 seats, unanimity, dissent ledger,<br/>tenure &amp; succession, precedent corpus"]
 
     style P1 fill:#0d2a4a,color:#fff
@@ -58,6 +61,14 @@ flowchart LR
 
 Phase 2 is the one teams skip and later regret. Until the implementer is mechanically
 prevented from editing acceptance tests, green results carry no information.
+
+**Memory and skills are cross-cutting, not a phase.** The work journal (§9.4) belongs in
+phase 1 — it is what makes a crashed run resumable, and retrofitting it later means every
+earlier run is unrecoverable. Structured compaction lands with phase 3, when work orders
+first get long enough to overflow. The project memory store lands with phase 4, when
+refinement loops start needing history. Skills accumulate from phase 2 onward as the
+Supervisor extracts them; the eval gate on promotion must exist *before* the first skill
+ships, or the registry starts collecting folklore immediately.
 
 The Commission comes **last** for a reason. It is a quality amplifier, not a quality
 substitute: ten unanimous judges in front of a pipeline whose deterministic gates are
@@ -114,7 +125,13 @@ prevents each.
 | Trusting a verdict from a stale base | Green PR, red main | Rebase-and-re-verify in merge queue (§2.12) |
 | Skipping the flake protocol | Nobody trusts the suite; real failures get overridden | Quarantine + flake budget (§4.2⑤) |
 | Prompts edited ad hoc in production | Unattributable quality regressions | Versioned prompt registry + eval gate (§5.3) |
-| Accumulating unvalidated "lessons" | Contradictory folklore crowding out the task | Eval-gated lesson promotion (§5.3) |
+| Accumulating unvalidated "lessons" | Contradictory folklore crowding out the task | Eval-gated lesson promotion (§5.3, §9.6) |
+| Skill/tool description that says *what* not *when* | Never triggers, or triggers on everything | Prescriptive trigger conditions (§8.5) |
+| Giving every agent every tool | Wrong tool chosen; schemas crowd the window | Role-scoped surfaces + deferred loading (§8.7) |
+| Relying on the transcript to resume a run | Lease expiry or compaction loses the state | Work journal replayed instead (§9.4) |
+| Free-form compaction summaries | Semantic drift; load-bearing detail silently dropped | Fixed compaction schema, `goal` verbatim (§9.3) |
+| Writing memory from unverified runs | Errors compound through experience-following loops | Write-gate on verified outcomes only (§9.5, §9.8) |
+| Memory store with no garbage collector | Context rot, retrieval precision collapse, rising cost | TTL, decay, dedupe, pruning (§9.7) |
 | Scaling implementers to fix slowness | Integration is the bottleneck; more WIP means more conflicts | Size from merge queue backwards (§5.5) |
 | Agents with open network egress and repo credentials | Exfiltration path | Egress allowlist + least-privilege scoping (§5.4) |
 | Removing the human gate early | Compounding errors in irreversible places | Risk-class-driven approval (§3.2, §2.17) |
@@ -148,6 +165,8 @@ If you implement only one page of this design, implement this:
 4. **Gate 0** as deterministic ground truth, fail-fast.
 5. A **Refiner** with a 3-attempt ceiling, a failure bundle, and a no-progress detector.
 6. **Escalation to a human** with the full evidence pack when the ceiling is hit.
+7. A **work journal** per run, replayed on resume — so a crash costs one attempt, not the
+   whole work order.
 
 That is a working, honest system. Everything else in this design makes it cheaper, faster,
 and larger — but those six items are what make it *trustworthy*.

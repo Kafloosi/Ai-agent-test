@@ -16,6 +16,7 @@ on escaped-defect rate.** Quality is a constraint, not a term to be traded away.
 | Human touches per work order | interventions ÷ merges | ↓ |
 | Escalation rate | escalated ÷ total | 5–15% band |
 | Commission first-round acceptance | dossiers accepted 10/10 on round 1 | ↑ — falling means either quality regression or seat drift (§7.11) |
+| Repeat-defect rate | same defect class recurring after a lesson shipped | ↓ to zero — the honest test of whether the fleet remembers (§9.10) |
 
 ## 5.2 Cost optimisation
 
@@ -52,7 +53,10 @@ flowchart TB
    model's mistakes are caught, not shipped.
 3. **Retrieval instead of whole-repo context.** Cost is superlinear in context length and
    accuracy degrades in long contexts. Top-k retrieval with symbol-graph expansion
-   outperforms "give the model everything" on both axes.
+   outperforms "give the model everything" on both axes. The same logic governs procedural
+   knowledge: skills load by progressive disclosure — description resident, body on
+   activation, references on demand — so an agent can carry dozens of procedures for the
+   cost of a few hundred tokens (§8.1).
 4. **Result and verification caching.** Key on `(work order hash, dependency hashes, base
    commit, prompt version, model version)`. Build caches, test-impact analysis, and
    incremental typechecking mean a rebase does not re-run 40 minutes of CI.

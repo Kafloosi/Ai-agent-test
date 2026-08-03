@@ -20,7 +20,12 @@ Four principles drive every decision in this design:
 4. **State lives outside the agents.** Agents are stateless workers over a durable
    task graph. That is what makes the system restartable, parallelisable, and
    horizontally scalable.
-5. **Final acceptance is unanimous, and its judges are term-limited.** A ten-seat
+5. **Nothing is remembered unless something writes it down.** Agents are stateless and
+   context windows are finite, so memory is explicit infrastructure: a
+   [four-layer store](docs/09-memory-and-learning.md) — working, episodic, semantic,
+   procedural — with a work journal that survives compaction and lease expiry, and a gated
+   promotion path from "this happened once" to "the fleet knows this".
+6. **Final acceptance is unanimous, and its judges are term-limited.** A ten-seat
    [Commission](docs/07-commission.md) holds absolute authority at the last gate: one
    dissent voids everything until the objection is fixed. Each seat serves three passings,
    then hands a validated Precedent Pack to a successor — so the standard compounds across
@@ -37,6 +42,8 @@ Four principles drive every decision in this design:
 | [`docs/05-optimization-and-scaling.md`](docs/05-optimization-and-scaling.md) | Cost/latency/quality optimisation, scaling model, capacity and governance |
 | [`docs/06-implementation-guide.md`](docs/06-implementation-guide.md) | Stack choices, phased rollout, metrics, anti-patterns |
 | [`docs/07-commission.md`](docs/07-commission.md) | The Commission: ten-seat unanimous adjudication, dissent lifecycle, tenure and succession |
+| [`docs/08-agent-skills-and-tools.md`](docs/08-agent-skills-and-tools.md) | Skills, tools and connectors per agent; the Design Agent; permission matrix |
+| [`docs/09-memory-and-learning.md`](docs/09-memory-and-learning.md) | Four-layer memory, compaction, work journals, the learning loop, memory integrity |
 | [`schemas/`](schemas/) | JSON Schemas for the message contracts between agents |
 
 ## Master flowchart
@@ -54,6 +61,9 @@ flowchart TB
     subgraph PLAN["② Design &amp; Decomposition"]
         G_SPEC -- pass --> ARCH["Architect"]
         ARCH --> ADR{{"Architecture:<br/>ADRs, interfaces, risks"}}
+        SPEC -.->|"parallel track"| DES["Design Agent<br/>flows · states · a11y · copy"]
+        DES --> UX{{"Design decision:<br/>interface contracts"}}
+        UX --> G_ARCH
         ADR --> G_ARCH{"Design review<br/>+ risk class"}
         G_ARCH -- "high risk" --> HUMAN2["Human design approval"]
         HUMAN2 --> DEC
@@ -125,13 +135,20 @@ flowchart TB
         SUP["Supervisor / Meta-agent"]
         DONE --> SUP
         ESC --> SUP
-        SUP --> LESSON[("Lesson store:<br/>rules, checklists, evals")]
+        SUP --> LESSON[("Procedural memory:<br/>skills · lessons · rubrics")]
         PACK -.->|"rejected patterns"| LESSON
-        LESSON -.->|"injected into prompts"| POOL
+        SUP --> EVALG{"Eval-gated?<br/>improves golden set"}
+        EVALG -- no --> DISCARD["Discard —<br/>no folklore"]
+        EVALG -- yes --> LESSON
+        LESSON -.->|"progressive disclosure"| POOL
         LESSON -.-> ARCH
         LESSON -.-> TE
-        MEM[("Memory service:<br/>repo map · ADRs · retrieval")]
+        MEM[("Semantic memory:<br/>repo map · contracts · ADRs")]
+        EPIS[("Episodic memory:<br/>attempts · journals · verdicts")]
         MEM -.-> RA & ARCH & POOL & GATE1
+        EPIS -.->|"failure bundle,<br/>falsified hypotheses"| REF
+        EPIS -->|"pattern across episodes"| MEM
+        MEM --> SUP
     end
 
     style GATE0 fill:#1f6f43,color:#fff
@@ -176,6 +193,7 @@ prompts and added to the evaluation suite.
 | Orchestrator | Task graph, worker health | Assignments, budgets | Can halt any branch |
 | Requirements Analyst | Human request, product context | Product Spec, acceptance criteria | Blocks on ambiguity |
 | Architect | Product Spec | ADRs, interface contracts, risk register | Blocks on infeasibility |
+| Design Agent | Product Spec, design system | Flows, state inventory, a11y annotations, copy | Blocks on undefined states |
 | Task Decomposer | Architecture + spec | Work-order DAG | Blocks on unsizable work |
 | Implementers (×N) | Work order, contracts, repo context | Patch, self-tests, notes | None |
 | Test Engineer | Acceptance criteria, contracts | Executable test suites | Owns test files |
@@ -188,7 +206,7 @@ prompts and added to the evaluation suite.
 | Integrator | Commission-accepted patches | Merge, conflict resolution | Blocks on conflict |
 | Documentation Agent | Merged diff, ADRs | Docs, changelog | None |
 | Release Agent | Merged main | Deploy, canary, rollback | **Hard block** on canary regression |
-| Memory Curator | All artifacts | Repo map, retrieval, summaries | None |
+| Memory Curator | All artifacts | Context packs, repo map, retrieval, pruning | None |
 | Supervisor | Metrics, escalations | Lessons, routing tuning, alerts | Can trip circuit breakers |
 
 See [`docs/02-agent-specs.md`](docs/02-agent-specs.md) for the full specification of each,

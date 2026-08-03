@@ -221,6 +221,11 @@ Ordering matters: everything stable goes first so the cacheable prefix is as lon
 possible. In steady state this is the difference between paying full price for a 200k-token
 context on every attempt and paying full price once.
 
+The pack is the agent's **working memory** — one of four layers. What persists beyond the
+run (episodic attempt history, semantic project facts, procedural skills and lessons), how
+a run survives compaction and lease expiry, and how memory is kept from rotting are
+specified in [`09-memory-and-learning.md`](09-memory-and-learning.md).
+
 ## 1.6 What is deliberately *not* an agent
 
 A recurring failure mode in multi-agent designs is modelling deterministic work as an

@@ -1,0 +1,73 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/schemas/skill.schema.json",
+  "title": "Skill",
+  "description": "Front-matter metadata for a skill directory (skills/<name>/SKILL.md). Only `name` and `description` are resident before activation — roughly 30-50 tokens — so the description is the entire trigger. The procedure body loads on activation; bundled references load only when the procedure reaches them.",
+  "type": "object",
+  "required": ["name", "description", "version", "roles"],
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
+      "maxLength": 64,
+      "description": "Directory name. One skill, one procedure — a skill covering three loosely related things triggers on all three and helps with none."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 500,
+      "description": "MUST state WHEN to use this, not just what it is. 'Expand/contract database migrations' never fires; 'Use when a change alters a database schema — adding, removing, or changing columns, tables, or indexes' fires reliably."
+    },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "roles": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" },
+      "description": "Agent roles whose context packs carry this skill's description. Scoping by role is the first defence against a bloated capability surface."
+    },
+    "tier2_tokens": {
+      "type": "integer",
+      "description": "Approximate size of SKILL.md itself, paid on every activation. Above roughly a page, move detail into references."
+    },
+    "references": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tier-3 files loaded on demand: engine-specific detail, worked examples, long tables."
+    },
+    "templates": { "type": "array", "items": { "type": "string" } },
+    "scripts": { "type": "array", "items": { "type": "string" } },
+    "requires_tools": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Tools the procedure invokes. A skill whose tools the acting role lacks must not be offered to it."
+    },
+    "failure_modes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "What usually goes wrong. A procedure that states its failure modes outperforms one that only lists happy-path steps."
+    },
+    "provenance": {
+      "type": "object",
+      "description": "Skills are earned, not assumed — most originate as a pattern the Supervisor extracted from repeated escalations or Commission rejected_patterns.",
+      "properties": {
+        "origin": { "enum": ["authored", "escalation_pattern", "commission_precedent", "incident", "human"] },
+        "source_refs": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "eval": {
+      "type": "object",
+      "description": "Promotion gate. A skill that does not measurably improve the golden task set does not ship — this is what stops the registry degenerating into contradictory folklore.",
+      "properties": {
+        "golden_tasks": { "type": "array", "items": { "type": "string" } },
+        "baseline_score": { "type": "number" },
+        "with_skill_score": { "type": "number" },
+        "approved_by": { "type": "string" },
+        "approved_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "status": {
+      "enum": ["draft", "active", "deprecated", "retired"],
+      "description": "Retired when it stops improving the golden set — context budget is finite and every resident description is rent."
+    }
+  }
+}
