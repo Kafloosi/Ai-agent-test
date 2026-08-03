@@ -76,11 +76,15 @@ Enforced mechanically, not by trust:
 | Commission seat — DISSENT | `Dissent` | failure statement + remediation condition | 400 |
 | Supervisor | Lessons, tuning proposals | Analysis | 4,000 |
 
-The Commission row is the largest single saving in the design. Ten seats × three rounds,
-each previously writing a paragraph of rationale, is ~12,000 tokens of prose per work order
-that no downstream stage reads. **A PASS vote now carries no rationale at all** — a seat that
-agrees has nothing to contribute, and its agreement is fully expressed by the vote. Rationale
-is required only when a seat blocks, because only then does someone have to act on it.
+**A PASS vote carries no rationale at all** — a seat that agrees has nothing a downstream
+stage consumes, and its agreement is fully expressed by the vote. Rationale is required only
+when a seat blocks, because only then does someone have to act on it.
+
+This is free and worth doing, but it is a *small* lever: the model in
+[§13.4](13-token-model.md) puts it at roughly 0.5% of per-work-order cost. Output tokens are
+dwarfed by input tokens everywhere in this design. The large savings are input-side —
+context budgets (~70% of the total reduction), then first-pass yield (~20%), then bench
+composition. Optimise in that order.
 
 ## 10.3 Input-side optimization
 
