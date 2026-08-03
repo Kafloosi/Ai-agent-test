@@ -7,7 +7,7 @@
   "required": ["gate", "work_order_id", "base_commit", "patch_hash", "result", "issued_at"],
   "additionalProperties": false,
   "properties": {
-    "gate": { "enum": ["gate0", "gate1", "gate2"] },
+    "gate": { "enum": ["gate0", "gate2", "gateC"] },
     "work_order_id": { "type": "string" },
     "attempt": { "type": "integer", "minimum": 1 },
     "base_commit": { "type": "string" },
@@ -45,7 +45,7 @@
     },
     "findings": {
       "type": "array",
-      "description": "Gate 1 detail. A blocking finding without a reproducible failure_scenario is invalid and must be downgraded.",
+      "description": "Gate C detail (seats C2/C6/C7). A blocking finding without a reproducible failure_scenario is invalid and must be downgraded.",
       "items": { "$ref": "https://example.com/schemas/finding.schema.json" }
     },
     "coverage_delta": { "type": "number" },

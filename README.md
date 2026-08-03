@@ -6,7 +6,7 @@ gates, bounded feedback loops, explicit failure handling, and horizontal scalabi
 
 ## Design thesis
 
-Four principles drive every decision in this design:
+Eight principles drive every decision in this design:
 
 1. **Ground truth is deterministic, not conversational.** Compilers, type checkers,
    test runners and scanners decide whether work is correct. LLM agents propose;
@@ -62,6 +62,7 @@ Four principles drive every decision in this design:
 | [`docs/11-capability-genesis-and-amendments.md`](docs/11-capability-genesis-and-amendments.md) | Three-candidate tournaments for missing capabilities; 80% Commission amendment process |
 | [`docs/12-skill-acquisition.md`](docs/12-skill-acquisition.md) | Agents acquiring missing skills themselves, including from the internet, with verification |
 | [`docs/13-token-model.md`](docs/13-token-model.md) | Cost model: tokens per work order and per minute, optimized vs unoptimized |
+| [`docs/14-optimization-backlog.md`](docs/14-optimization-backlog.md) | Remaining optimizations: implemented, proposed, and deliberately rejected |
 | [`CLAUDE.md`](CLAUDE.md) | Session economy — output discipline for anyone (human or agent) working in this repo |
 | [`schemas/`](schemas/) | JSON Schemas for the message contracts between agents |
 
@@ -106,9 +107,7 @@ flowchart TB
         PATCH --> GATE0["Gate 0 — Deterministic<br/>build · lint · types · tests · SAST"]
         TESTS --> GATE0
         GATE0 -- fail --> RC
-        GATE0 -- pass --> GATE1["Gate 1 — Semantic<br/>Reviewer · Security · Performance"]
-        GATE1 -- "blocking findings" --> RC
-        GATE1 -- pass --> GATE2["Gate 2 — Acceptance<br/>e2e · budgets · human sign-off"]
+        GATE0 -- pass --> GATE2["Gate 2 — Acceptance<br/>e2e · budgets · human sign-off"]
         GATE2 -- fail --> RC
     end
 
@@ -164,14 +163,13 @@ flowchart TB
         LESSON -.-> TE
         MEM[("Semantic memory:<br/>repo map · contracts · ADRs")]
         EPIS[("Episodic memory:<br/>attempts · journals · verdicts")]
-        MEM -.-> RA & ARCH & POOL & GATE1
+        MEM -.-> RA & ARCH & POOL & BENCH
         EPIS -.->|"failure bundle,<br/>falsified hypotheses"| REF
         EPIS -->|"pattern across episodes"| MEM
         MEM --> SUP
     end
 
     style GATE0 fill:#1f6f43,color:#fff
-    style GATE1 fill:#8a6d1f,color:#fff
     style GATE2 fill:#7a3b8f,color:#fff
     style COMM fill:#2b0f36,color:#fff
     style BENCH fill:#4a1d5c,color:#fff
@@ -188,9 +186,9 @@ the spec into interface contracts and an **ADR** trail; a **Decomposer** turns t
 DAG of small work orders, each carrying its own acceptance criteria. An **Orchestrator**
 schedules ready work orders onto pools of specialised **Implementers**, while a separate
 **Test Engineer** writes the acceptance tests those implementers are not allowed to edit.
-Every patch runs the **Gate 0** deterministic suite, then LLM **Gate 1** review
-(correctness, security, performance), then **Gate 2** acceptance and human sign-off for
-risky classes. Any failure is classified by root cause and routed back to the *specific*
+Every patch runs the **Gate 0** deterministic suite, then **Gate 2** acceptance and human
+sign-off for risky classes. Semantic review — correctness, security, performance — is not a
+separate gate: it lives in the Commission seats that hold those jurisdictions. Any failure is classified by root cause and routed back to the *specific*
 stage that caused it — code, tests, decomposition, design, or spec — under a hard attempt
 and budget ceiling with no-progress detection. Exhausted loops climb an escalation ladder
 (retry → stronger model → repair specialist → re-plan → human). Work that survives all three
@@ -217,9 +215,7 @@ prompts and added to the evaluation suite.
 | Implementers (×N) | Work order, contracts, repo context | Patch, self-tests, notes | None |
 | Test Engineer | Acceptance criteria, contracts | Executable test suites | Owns test files |
 | Verifier (deterministic) | Patch + tests | Machine verdict | **Hard block** |
-| Code Reviewer | Diff, contracts, lessons | Findings with severity | Blocks on ≥ major |
-| Security Agent | Diff, threat model, deps | Vulnerability findings | **Hard block** on high |
-| Performance Agent | Diff, benchmarks, budgets | Regression report | Blocks on budget breach |
+| Correctness · Security · Performance | Diff, contracts, threat model, budgets | Findings with severity | Seats C2 / C6 / C7 — absolute veto |
 | Refiner | Failure bundle | Minimal corrective patch | None |
 | **Commission (10 seats)** | Sealed case dossier | Unanimous verdict, dissents, precedent | **Absolute — any one seat voids all** |
 | Integrator | Commission-accepted patches | Merge, conflict resolution | Blocks on conflict |

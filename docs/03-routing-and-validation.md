@@ -72,6 +72,12 @@ routing decisions) and must return a justification that is logged.
 Validation is layered cheapest-and-most-objective first. Each gate's output is a signed
 verdict stored against the work order.
 
+> **Gate 1 no longer exists.** Semantic review (correctness, security, performance) was being
+> performed twice — once by standalone Gate 1 agents and again by Commission seats C2, C6 and
+> C7 holding the same jurisdictions. Those agents *are* the seats now, and the chain is
+> **Gate 0 → Gate 2 → Gate C**. Rationale and cost effect in
+> [`14-optimization-backlog.md`](14-optimization-backlog.md) §O1.
+
 ```mermaid
 flowchart LR
     P["Patch + tests"] --> G0
@@ -86,17 +92,7 @@ flowchart LR
     end
 
     G0 -- fail --> RC(("Root-cause<br/>classifier"))
-    G0 -- pass --> G1
-
-    subgraph G1["GATE 1 — Semantic (LLM judgement)"]
-        direction TB
-        A1["Reviewer: correctness,<br/>contract fidelity, edge cases"]
-        B1["Security: authz, trust<br/>boundaries, data handling"]
-        C1["Performance: budgets,<br/>query plans, hot paths"]
-    end
-
-    G1 -- "blocker / major" --> RC
-    G1 -- pass --> G2
+    G0 -- pass --> G2
 
     subgraph G2["GATE 2 — Acceptance"]
         direction TB
@@ -112,7 +108,6 @@ flowchart LR
     GC -- "10 × PASS" --> OK["APPROVED → merge queue"]
 
     style G0 fill:#1f6f43,color:#fff
-    style G1 fill:#8a6d1f,color:#fff
     style G2 fill:#7a3b8f,color:#fff
     style GC fill:#4a1d5c,color:#fff
     style OK fill:#1f6f43,color:#fff
@@ -135,9 +130,11 @@ flowchart LR
 | Check | Low | Medium | High |
 |---|---|---|---|
 | Gate 0 full suite | ✅ | ✅ | ✅ |
-| Reviewer | T1 | T2 | T3 |
-| Security agent | on security-path diffs | ✅ | ✅ + human |
-| Performance agent | on hot-path diffs | ✅ | ✅ + benchmarks |
+| Clerk dossier validation (mechanical) | ✅ | ✅ | ✅ |
+| Correctness review (C2) | T2 | T2 | T3 |
+| Security review (C6) | via promotion | ✅ | ✅ + human |
+| Performance review (C7) | via promotion | ✅ | ✅ + benchmarks |
+| Evidence sufficiency (C10, LLM) | ❌ mechanical only | ❌ mechanical only | ✅ |
 | Human approval | ❌ | on escalation | ✅ mandatory |
 | Commission bench | **5 seats** (C1, C2, C3, C8, C10) | full 10 | full 10 |
 | Canary window | 15 min | 1 hour | 24 hours + staged flags |
@@ -154,6 +151,7 @@ deterministic — evaluated before adjudication, not by an agent:
 | Diff touches auth, authz, payments, PII, crypto, or secrets | C6's jurisdiction; never classifiable as low risk |
 | Diff changes a frozen contract or public API | C5 |
 | Diff includes a migration, IaC, CI, or feature-flag change | C9 |
+| Diff touches a measured hot path or a component with a benchmark budget | C7 — replaces Gate 1's conditional performance check |
 | Diff exceeds the low-risk size threshold | Size correlates with unreviewed surface |
 | Work order is on a class with an escape in the last 30 days | §7.12 auto-promotion |
 

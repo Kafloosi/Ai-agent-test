@@ -183,7 +183,12 @@ that rejects any diff touching protected test files from a non-test-engineer aut
 
 ---
 
-## 2.8 Code Reviewer (Critic)
+## 2.8 Code Reviewer (Critic) — now Commission seat C2
+
+This agent and Commission seat C2 held the same jurisdiction and adjudicated the same
+question twice. They are one agent now: the reviewer **is** seat C2, judging inside Gate C
+under the stricter admissibility rules of §7.4. The specification below is unchanged; only
+where it runs has changed (§14 O1). The same merge applies to §2.9 → C6 and §2.10 → C7.
 
 | Field | Specification |
 |---|---|

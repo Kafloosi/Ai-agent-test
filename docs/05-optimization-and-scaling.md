@@ -213,7 +213,7 @@ Starting points for sizing, to be replaced with measured values:
 | Quantity | Planning heuristic |
 |---|---|
 | Verifier workers | ≈ 1.5 × implementer workers (verification runs on every attempt, plus re-verification after rebase) |
-| Review capacity | ≈ 1 × implementer first-pass yield (only passing patches reach Gate 1) |
+| Review capacity | ≈ 1 × implementer first-pass yield (only passing patches reach Gate C) |
 | Merge queue throughput | `3600 ÷ (rebase + full verify seconds)` merges/hour — measure and treat as the fleet's true ceiling |
 | Implementer WIP | Set so queue depth stays flat; increase only when merge throughput has headroom |
 | Token budget per work order | p90 of measured historical usage for its type × 1.5 |

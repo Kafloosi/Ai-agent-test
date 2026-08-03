@@ -152,7 +152,7 @@ is seated with the same skills and the same knowledge in distilled form, and ret
 
 ```mermaid
 flowchart TB
-    SUB["Instance I(n) submits"] --> GATES["Gates 0–2"]
+    SUB["Instance I(n) submits"] --> GATES["Gate 0 + Gate 2"]
     GATES -- pass --> GC["Gate C — Commission"]
     GATES -- fail --> RC
     GC -- "10 × PASS" --> DONE["ACCEPTED"]
@@ -297,7 +297,8 @@ Four controls, none of which weakens the unanimity rule:
 
 1. **PASS carries no rationale** (§10.2) — the largest saving.
 2. **Shared cached dossier** — sealed once, read by all ten seats.
-3. **Gates 0–2 first** — the Commission only ever judges candidate-clean work.
+3. **Gate 0, Gate 2 and mechanical dossier validation first** — the Commission only ever
+   judges candidate-clean work with a complete record.
 4. **Five-seat bench on low-risk work** — C1, C2, C3, C8, C10; medium and high seat all ten.
    This is the default, not a tuning option (§7.12). It halves the dominant line item on
    roughly half of all work orders: ~125k saved per low-risk work order, ~14% off the blended

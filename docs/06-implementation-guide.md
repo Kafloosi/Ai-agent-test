@@ -86,7 +86,7 @@ trace: work_order_id
 ├── span: context_pack        attrs: tokens, cache_hit_ratio, retrieved_files, dropped
 ├── span: agent_run           attrs: role, model, tier, attempt, tokens_in/out, cost, confidence
 ├── span: gate0               attrs: check, duration, verdict, failing_tests[], coverage_delta
-├── span: gate1               attrs: findings_by_severity, blocking, agent_role
+├── span: clerk_validation    attrs: mechanical_checks, complete, missing[]
 ├── span: gate2               attrs: acceptance_pass, human_wait_ms
 ├── span: refinement          attrs: attempt, root_cause_class, progress_detected, escalation_rung
 ├── span: gateC_adjudication  attrs: round, bench, dossier_hash, votes, admissible_dissents,

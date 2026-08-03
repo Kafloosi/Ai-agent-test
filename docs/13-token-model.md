@@ -4,6 +4,12 @@ A cost model, not a measurement. Every number here is derived from the budget ta
 and stated assumptions below — the system has no telemetry yet. Treat these as sizing
 estimates to be replaced with measured values once phase 1 is running.
 
+> **Superseded in part.** The O1/O2/O6 changes in
+> [`14-optimization-backlog.md`](14-optimization-backlog.md) reduce the blended figure from
+> 570k to **≈395k** per merged work order. The tables below retain the pre-O1 structure
+> because it is the baseline those savings are measured against; §14.1 has the current
+> numbers.
+
 ## 13.1 Assumptions
 
 | Assumption | Value | Basis |

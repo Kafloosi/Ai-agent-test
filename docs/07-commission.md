@@ -52,10 +52,13 @@ flowchart TB
     style ACCEPT fill:#1f6f43,color:#fff
 ```
 
-The Commission deliberately runs **after** Gates 0–2, never instead of them. Ten LLM judges
-are the most expensive component in this design; spending them on work that does not
-compile, or whose tests fail, is waste. Gates 0–2 establish that the work is a *plausible
-candidate*; the Commission decides whether it is *acceptable*.
+The Commission runs **after Gate 0 and Gate 2**, never instead of them. Its judges are the
+most expensive component in this design; spending them on work that does not compile, whose
+tests fail, or whose dossier is incomplete is waste. Gate 0 and the Clerk's mechanical
+validation establish that the work is a *plausible candidate*; the Commission decides whether
+it is *acceptable*.
+
+There is no separate Gate 1 — semantic review lives in seats C2, C6 and C7 (§14 O1).
 
 ## 7.3 The ten seats
 
@@ -76,7 +79,18 @@ actionable, and clearable.
 | **C7** | **Performance & Cost** | Does it stay inside NFR and infrastructure-cost budgets? | Benchmarks, query plans, budgets, baselines | T2 |
 | **C8** | **Test Integrity** | Are the tests real, and was the suite weakened to get here? | Red-green evidence, coverage delta, test diffs, quarantine list | T3 |
 | **C9** | **Operability** | Can this be run, observed, migrated, and rolled back in production? | Migration plan, flags, telemetry, runbook | T2 |
-| **C10** | **Evidence & Process** | Is every claim in this dossier actually backed by an artifact? | The dossier itself, provenance chain, hashes | T3 |
+| **C10** | **Evidence & Process** | Is every claim in this dossier actually backed by an artifact? | The dossier itself, provenance chain, hashes | Mechanical¹ / T3 |
+
+¹ **C10 is mostly deterministic and no longer an LLM seat except on high-risk work.** Verdict
+presence, hash and base-commit currency, contiguous attempt history, criterion→test mapping,
+and artifact citation for every claim are all mechanically checkable. The Clerk runs them
+*before* sealing the dossier, so an incomplete record never reaches the bench. An LLM C10 seat
+is retained only for high risk, judging whether the evidence is *sufficient* for the risk
+class — the one part that is genuinely judgement (§14 O2).
+
+Seats **C2, C6 and C7 absorbed the former Gate 1 agents.** The Code Reviewer, Security Agent
+and Performance Agent held the same jurisdictions as these seats and were adjudicating the same
+questions a second time at full price; they are now the seats themselves (§14 O1).
 
 **C10 is the meta-seat.** It does not judge the code; it judges whether the other nine were
 given enough to judge it. A dossier with a missing verdict, an unattributed claim, a
@@ -441,7 +455,8 @@ low enough for a ten-seat unanimity rule to be usable at all. **Track *q* per se
 one**; it is the Commission's vital sign.
 
 **Cost.** Ten judgements per adjudication round, up to 3 rounds. Mitigations already in the
-design: the Commission runs only on work that has cleared Gates 0–2; seats are tiered
+design: the Commission runs only on work that has cleared Gate 0, Gate 2 and the Clerk's
+mechanical dossier validation; seats are tiered
 (four T2 seats, six T3); votes are parallel so latency is one round, not ten; and the
 sealed dossier plus Precedent Pack form a long cacheable prefix shared across all ten seats
 and across rounds (§5.2), which is the difference between paying for the dossier once and
