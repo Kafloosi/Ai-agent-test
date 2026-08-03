@@ -235,7 +235,7 @@ and [`docs/07-commission.md`](docs/07-commission.md) for the ten Commission seat
 
 | | |
 |---|---|
-| **Composition** | 10 seats, disjoint jurisdictions, read-only, blind parallel voting |
+| **Composition** | 10 seats, disjoint jurisdictions, read-only, blind parallel voting. **Low-risk work seats 5** (C1, C2, C3, C8, C10) — the jurisdictions with no deterministic backstop; promotion to full bench is deterministic and mandatory on any security, contract, migration or infra path |
 | **Decision rule** | Unanimity. One admissible dissent voids the entire adjudication — no partial acceptance |
 | **Dissent validity** | Must state jurisdiction, cite evidence, name a concrete failure, and give an objectively checkable clearance condition |
 | **Clearance** | Only the issuing seat — or its successor — may clear its own dissent |

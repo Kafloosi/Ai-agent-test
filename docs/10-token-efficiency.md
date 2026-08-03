@@ -298,13 +298,18 @@ Four controls, none of which weakens the unanimity rule:
 1. **PASS carries no rationale** (§10.2) — the largest saving.
 2. **Shared cached dossier** — sealed once, read by all ten seats.
 3. **Gates 0–2 first** — the Commission only ever judges candidate-clean work.
-4. **Bench composition by risk class** — low-risk work seats five (C1, C2, C3, C8, C10);
-   medium and high seat all ten. Governs *which seats are seated*, never whether a seated
-   seat's dissent binds (§7.12).
+4. **Five-seat bench on low-risk work** — C1, C2, C3, C8, C10; medium and high seat all ten.
+   This is the default, not a tuning option (§7.12). It halves the dominant line item on
+   roughly half of all work orders: ~125k saved per low-risk work order, ~14% off the blended
+   per-work-order cost (§13.4a). Governs *which seats are seated*, never whether a seated
+   seat's dissent binds — and the promotion triggers that keep "low risk" honest are
+   deterministic (§3.2).
 
-Full bench remains the default until per-seat false-dissent rate *q* is measured and stable.
-A rising *q* is the expensive failure here: at q = 0.05 only 60% of clean work is accepted
-first round, and every spurious rejection now costs a full replacement cycle.
+A rising per-seat false-dissent rate *q* is the expensive failure here: at q = 0.05 only 60%
+of clean work is accepted first round with a full bench, and every spurious rejection now
+costs a full replacement cycle. The five-seat bench also improves this directly — clean
+low-risk work is accepted at `(1 − q)^5` rather than `(1 − q)^10`, which at q = 0.01 is 95%
+instead of 90%.
 
 ## 10.8 Guardrails against over-optimization
 

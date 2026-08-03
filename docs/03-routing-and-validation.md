@@ -139,12 +139,23 @@ flowchart LR
 | Security agent | on security-path diffs | ✅ | ✅ + human |
 | Performance agent | on hot-path diffs | ✅ | ✅ + benchmarks |
 | Human approval | ❌ | on escalation | ✅ mandatory |
-| Commission bench | reduced (C1,C2,C3,C8,C10) | full 10 | full 10 |
+| Commission bench | **5 seats** (C1, C2, C3, C8, C10) | full 10 | full 10 |
 | Canary window | 15 min | 1 hour | 24 hours + staged flags |
 
 Bench composition governs which seats are *seated* for a risk class. It never softens the
-decision rule: a dissent from any seated commissioner voids the entire adjudication. Full
-bench is the default until per-seat precision has been measured and is stable (§7.12).
+decision rule: a dissent from any seated commissioner voids the entire adjudication.
+
+**The five-seat bench is the default for low-risk work** (§7.12). It depends on the risk
+classifier being conservative, so these promotions to full bench are mandatory and
+deterministic — evaluated before adjudication, not by an agent:
+
+| Promotion trigger | Reason |
+|---|---|
+| Diff touches auth, authz, payments, PII, crypto, or secrets | C6's jurisdiction; never classifiable as low risk |
+| Diff changes a frozen contract or public API | C5 |
+| Diff includes a migration, IaC, CI, or feature-flag change | C9 |
+| Diff exceeds the low-risk size threshold | Size correlates with unreviewed surface |
+| Work order is on a class with an escape in the last 30 days | §7.12 auto-promotion |
 
 ## 3.3 The feedback loop: root-cause routing
 

@@ -449,17 +449,47 @@ paying for it thirty times.
 
 **Throughput.** The Commission sits directly in front of the merge queue, which §5.5
 identifies as the fleet's real bottleneck. Adding a mandatory ten-judge unanimous gate in
-front of it makes integration throughput the binding constraint even sooner. Two knobs,
-both of which preserve the absolute authority of any seated commissioner:
+front of it makes integration throughput the binding constraint even sooner.
 
-| Knob | Effect | Recommendation |
+### Bench composition — five seats on low-risk work
+
+| Risk class | Seated | Rationale |
 |---|---|---|
-| **Bench composition by risk class** — low-risk work seats a reduced bench (e.g. C1, C2, C3, C8, C10); medium and high seat all ten | Cuts cost on routine work; any seated seat still holds absolute veto | Enable once per-seat precision is measured and stable |
-| **Full bench always** | Maximum rigour, maximum cost | Default until the metrics in §7.11 justify reducing |
+| **Low** | **C1, C2, C3, C8, C10** | The five jurisdictions with no deterministic backstop |
+| Medium | All ten | — |
+| High | All ten, T3, plus human sign-off | — |
 
-The rule the user specified is preserved exactly in both configurations: **one dissent from
-any seated commissioner voids everything.** The knob governs which seats are seated for a
-given risk class, never whether a seated seat's dissent is binding.
+**The decision rule is unchanged: one dissent from any seated commissioner voids
+everything.** Bench composition governs which seats are seated, never whether a seated
+seat's dissent binds.
+
+The five retained seats are not an arbitrary subset. They are exactly the jurisdictions that
+**nothing deterministic can cover** — whether the work meets the requirement (C1), actually
+functions (C2), is fixed rather than worked around (C3), rests on real tests (C8), and is
+backed by a complete record (C10). Each of the five dropped seats has a Gate 0 check standing
+behind it:
+
+| Dropped seat | Deterministic backstop |
+|---|---|
+| C4 Method & Skills | Tool/skill invocation log; protected-path check |
+| C5 Contract & Architecture | Gate 0 `contract_conformance` |
+| C6 Security & Privacy | Gate 0 SAST / SCA / secrets / licence, **plus mandatory promotion to full bench on any security-relevant path** |
+| C7 Performance & Cost | Measured budgets, not judgement — a breach is a Gate 0 failure |
+| C9 Operability | Migrations, IaC, CI and flag changes force promotion to full bench |
+
+This makes the reduced bench safe only insofar as the risk classifier is conservative, so the
+promotion triggers in §3.2 are **deterministic and evaluated before adjudication** — never an
+agent's judgement call. A work order is low-risk by exclusion: it touches no security path, no
+frozen contract, no migration or infrastructure, and stays under the size threshold.
+
+**Auto-promotion on escape.** If a defect reaches production from a work-order class that was
+adjudicated by a reduced bench, that class reverts to full bench for 30 days and the escape
+is recorded against the seats that would have caught it. The reduced bench is a default, not
+a commitment — it tightens automatically when it is wrong.
+
+**Full bench remains available as a configuration** for organisations that want maximum rigour
+regardless of cost, and is the right setting for the first weeks of operation, before per-seat
+false-dissent rates are measured.
 
 ## 7.12a Second function — amendments
 
