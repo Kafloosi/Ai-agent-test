@@ -62,7 +62,7 @@ Eight principles drive every decision in this design:
 | [`docs/11-capability-genesis-and-amendments.md`](docs/11-capability-genesis-and-amendments.md) | Three-candidate tournaments for missing capabilities; 80% Commission amendment process |
 | [`docs/12-skill-acquisition.md`](docs/12-skill-acquisition.md) | Agents acquiring missing skills themselves, including from the internet, with verification |
 | [`docs/13-token-model.md`](docs/13-token-model.md) | Cost model: tokens per work order and per minute, optimized vs unoptimized |
-| [`docs/14-optimization-backlog.md`](docs/14-optimization-backlog.md) | Remaining optimizations: implemented, proposed, and deliberately rejected |
+| [`docs/14-optimization-backlog.md`](docs/14-optimization-backlog.md) | Remaining optimizations: implemented, proposed, rejected, and the work-order sizing lever |
 | [`docs/15-review-findings.md`](docs/15-review-findings.md) | Commission review of this design: 22 findings, 4/4 seats dissenting, 18 remediated |
 | [`docs/16-specifications.md`](docs/16-specifications.md) | Filled specifications: risk and root-cause classifiers, the three undefined gates, golden set, *q*, thresholds, Policy Engine |
 | [`CLAUDE.md`](CLAUDE.md) | Session economy — output discipline for anyone (human or agent) working in this repo |

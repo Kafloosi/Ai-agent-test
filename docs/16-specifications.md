@@ -126,7 +126,7 @@ as placeholders where they are.
 
 | Threshold | Value | Basis | Owner |
 |---|---|---|---|
-| Work-order size threshold | 400 changed lines or 8 files | Placeholder — recalibrate from the p75 of merged first-pass work orders | Decomposer |
+| Work-order size threshold | **1,200 changed lines or 24 files** | Raised from 400/8. ~65% of per-work-order cost is fixed regardless of size, so sizing for context alone left ~2.3× more overhead than output (§14.6). Revert if measured yield at this size falls below 45% | Decomposer |
 | Diff-oscillation similarity | ≥ 90% | Computed on the **normalised AST diff**, not text — whitespace and rename churn otherwise mask a repeat | Loop guard |
 | Budget-burn trip | > 60% budget with < 30% of failing checks resolved | Placeholder | Loop guard |
 | Implementer confidence θ | 0.7 | **Uncalibrated and self-reported.** Until calibration exists, θ escalates tier but never *avoids* a gate — a self-report may not shorten the verification path | Orchestrator |

@@ -123,6 +123,99 @@ applies to them most strongly.
 | Single-seat "chief judge" instead of a bench | Correlated failure: one judge's blind spot becomes the system's blind spot, with no independent signal |
 | Compress the work journal | It is already ≤2k and is what makes replacement cheap. Compressing the thing that prevents re-derivation is a false economy |
 
+## 14.6 The largest remaining lever: work-order size
+
+Everything above optimises the *cost of a step*. This optimises the *number of steps*, and it
+is worth more than all of §14.1 combined.
+
+### Most of the cost is fixed per work order, not per unit of work
+
+Post-O1/O2/O6, blended first-pass ≈ 327k. Split by what the cost actually scales with:
+
+| Component | Blended | Scales with |
+|---|---:|---|
+| Gate C — Commission | 175.4k | **Work order count** (seat packs are capped; the dossier barely grows) |
+| Integration | 32.0k | **Work order count** |
+| Memory Curator | 5.0k | **Work order count** |
+| Construction | 76.0k | Volume of work |
+| Documentation | 16.8k | Volume of work |
+| Definition + Release (amortized) | 22.1k | Roughly neutral |
+
+> **≈ 65% of first-pass cost is fixed per work order and independent of how much work it
+> contains** — and rework re-pays Gate C, so with rework included the fixed share is higher
+> still.
+
+The design sized work orders for **context** (§2.4: one agent run within budget) and never
+for **cost**. Those give very different answers. At 400 changed lines a work order carries
+~212k of fixed overhead against ~93k of actual work — roughly **2.3× more overhead than
+output**.
+
+### The trade-off, quantified
+
+Bigger work orders amortise the fixed cost but lower first-pass yield, and every extra cycle
+re-pays Gate C. Let *s* = size in units of the current work order:
+
+| *s* | Fixed ÷ s | Variable | Assumed yield | Rework ÷ s | **Cost per unit of work** |
+|---:|---:|---:|---:|---:|---:|
+| 1 | 212k | 93k | 70% | 105k | **410k** |
+| 2 | 106k | 93k | 60% | 67k | **266k** |
+| **3** | **71k** | **93k** | **50%** | **63k** | **227k** |
+| 4 | 53k | 93k | 40% | 75k | **221k** |
+| 5 | 42k | 93k | 30% | 93k | **228k** |
+
+> **Optimum around 3–4× the current work-order size: ≈ 220k per unit of work against 410k
+> today — a 46% reduction, larger than every other optimization in this document put
+> together.**
+
+The curve is flat between 3× and 5×, which is the useful part: the exact optimum does not
+have to be found, only the right order of magnitude. Today's sizing is not near it.
+
+### Caveats, stated plainly
+
+- **The yield-versus-size curve is invented.** It is the one input that decides the answer,
+  and it must be measured before the threshold moves. Measure it by shipping a deliberate
+  spread of work-order sizes and recording first-pass yield per size band.
+- **Bigger work orders reduce DAG width**, which costs wall-clock on the critical path — but
+  §5.5 already says the fleet is merge-bound, so parallelism above the merge rate was waste
+  anyway. Fewer, larger merges is directionally *right* for a merge-bound system.
+- **Merge conflicts fall, not rise.** Fewer work orders touching the same files means fewer
+  module-lease collisions (§3.1).
+- **Context budgets bind before the optimum does.** At 3–4× the current size an implementer
+  needs a bigger pack than §10.5 allows. This trade is worth making — the model in §13.7 says
+  a 50% context increase costs 23% while this saves 46%.
+
+### Recommended change
+
+Raise the §16.7 size threshold from 400 lines / 8 files to **1,200 lines / 24 files**, raise
+implementer and test-engineer context budgets by 50%, and measure yield per size band from the
+first 50 merged work orders. Revert if yield at the larger size falls below 45% — that is the
+break-even point where the extra rework eats the amortisation.
+
+## 14.7 Other remaining reductions
+
+Ranked, against the ≈395k blended baseline.
+
+| # | Change | Saving | Notes |
+|---|---|---:|---|
+| **O12** | **Adjudicate by exception.** Skip Gate C entirely for classes where Gate 0 is a complete check: docs-only diffs, dependency bumps with green tests and clean SCA, generated-code refresh, config within a validated schema. Gate 0 already decides these; a bench adds nothing | −50k (−13%) | Requires the risk classifier (§16.1) to identify the classes deterministically. Any diff outside them adjudicates as normal |
+| **O13** | **Cut the self-modification machinery** — genesis tournaments, amendments, tenure and succession, web skill acquisition | Not in the per-work-order model at all; §15 F4 estimates tenure alone consumes several times the bench's own capacity | This is the review's own recommendation (§15.5). It removes capability rather than waste, so it is a product decision |
+| **O5** | Dossier stable-prefix caching across rounds | ~60% off re-adjudication billing | Infrastructure; no behaviour change |
+| **O14** | Batch documentation per epic rather than per work order | −12k (−3%) | Docs are the one artifact with no reason to be work-order-scoped |
+| **O3** | Diff-scoped judgement packs (25k → 15k) | −45k (−11%) | Still the riskiest item; §10.8's escape-rate guard must exist first |
+
+### If all of §14.6 and §14.7 were applied
+
+| Stage | Per unit of work |
+|---|---:|
+| Today | ~410k |
+| + right-sized work orders (§14.6) | ~220k |
+| + adjudicate by exception (O12) | ~190k |
+| + O5, O14, O3 | ~155k |
+| + cut self-modification (O13) | ~155k, and a materially simpler system |
+
+Roughly **2.6× better than today**, against a starting point already ~15× better than an
+unoptimized baseline. The first line does most of the work.
+
 ## 14.5 The pattern worth generalising
 
 Every large win so far has the same shape: **move work from judgement to determinism, or
